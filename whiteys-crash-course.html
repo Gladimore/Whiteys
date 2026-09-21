@@ -1,0 +1,1436 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Whitey's Crash Course</title>
+<style>
+  :root{
+    --cream:#FFF7EA;
+    --paper:#FFFCF6;
+    --choc:#3C2415;
+    --choc-soft:#6B4A34;
+    --strawberry:#D65D6E;
+    --mint:#8FBFA0;
+    --butterscotch:#E0A458;
+    --line:#E8DCC6;
+    --shadow:rgba(60,36,21,0.12);
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--cream);
+    background-image:
+      radial-gradient(circle at 15% 8%, #fffdf9 0, transparent 45%),
+      radial-gradient(circle at 90% 90%, #fdf0dd 0, transparent 40%);
+    font-family: "Iowan Old Style","Georgia",serif;
+    color:var(--choc);
+    min-height:100vh;
+  }
+  .wrap{
+    max-width:720px;
+    margin:0 auto;
+    padding:28px 20px 80px;
+  }
+  header{
+    text-align:center;
+    margin-bottom:18px;
+    position:relative;
+  }
+  .scoop-row{
+    display:flex;
+    justify-content:center;
+    gap:6px;
+    margin-bottom:6px;
+  }
+  .scoop{
+    width:14px;height:14px;border-radius:50%;
+    box-shadow:0 2px 3px var(--shadow);
+  }
+  h1{
+    font-family:"Baskerville","Iowan Old Style",Georgia,serif;
+    font-weight:700;
+    font-size:2rem;
+    margin:4px 0 2px;
+    letter-spacing:0.01em;
+  }
+  .subhead{
+    font-size:0.95rem;
+    color:var(--choc-soft);
+    font-style:italic;
+    margin:0;
+  }
+
+  nav.tabs{
+    display:flex;
+    gap:8px;
+    justify-content:center;
+    margin:22px 0 26px;
+    flex-wrap:wrap;
+  }
+  nav.tabs button{
+    font-family:inherit;
+    font-size:0.92rem;
+    padding:9px 18px;
+    border-radius:999px;
+    border:1.5px solid var(--line);
+    background:var(--paper);
+    color:var(--choc-soft);
+    cursor:pointer;
+    transition:background 0.15s, color 0.15s, border-color 0.15s;
+  }
+  nav.tabs button:hover{border-color:var(--choc-soft);}
+  nav.tabs button.active{
+    background:var(--choc);
+    color:var(--cream);
+    border-color:var(--choc);
+  }
+
+  .view{display:none;}
+  .view.active{display:block; animation:fadeIn 0.25s ease;}
+  @keyframes fadeIn{from{opacity:0; transform:translateY(4px);} to{opacity:1; transform:translateY(0);}}
+
+  /* Day plan */
+  .day-toggle{
+    display:flex;
+    gap:10px;
+    justify-content:center;
+    margin-bottom:20px;
+  }
+  .day-toggle button{
+    font-family:inherit;
+    font-size:1rem;
+    padding:10px 26px;
+    border-radius:10px;
+    border:1.5px solid var(--line);
+    background:var(--paper);
+    cursor:pointer;
+    color:var(--choc-soft);
+  }
+  .day-toggle button.active{
+    background:var(--strawberry);
+    border-color:var(--strawberry);
+    color:#fff;
+  }
+
+  .card{
+    background:var(--paper);
+    border:1px solid var(--line);
+    border-radius:14px;
+    padding:20px 22px;
+    margin-bottom:16px;
+    box-shadow:0 3px 10px var(--shadow);
+  }
+  .card h2{
+    font-size:1.2rem;
+    margin:0 0 4px;
+    display:flex;
+    align-items:baseline;
+    gap:8px;
+  }
+  .card h2 .minutes{
+    font-size:0.78rem;
+    font-weight:400;
+    font-style:italic;
+    color:var(--choc-soft);
+    margin-left:auto;
+  }
+  .card .tag{
+    display:inline-block;
+    font-size:0.72rem;
+    padding:2px 9px;
+    border-radius:999px;
+    margin-bottom:10px;
+    font-style:normal;
+  }
+  .tag.high{background:#FBE3E6; color:#A8384A;}
+  .tag.med{background:#FCEFD9; color:#96631A;}
+  .tag.low{background:#E7F0E9; color:#4B7A5C;}
+
+  .card ul{
+    margin:8px 0 0;
+    padding-left:20px;
+  }
+  .card li{
+    margin-bottom:7px;
+    line-height:1.5;
+    font-size:0.98rem;
+  }
+  .card li strong{color:var(--choc);}
+  .trick{
+    margin-top:12px;
+    padding:10px 14px;
+    background:#FBF6EA;
+    border-left:3px solid var(--butterscotch);
+    border-radius:0 8px 8px 0;
+    font-size:0.9rem;
+    font-style:italic;
+    color:var(--choc-soft);
+  }
+
+  .checkbox-row{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    margin-top:14px;
+    padding-top:12px;
+    border-top:1px dashed var(--line);
+  }
+  .checkbox-row input{
+    width:17px;height:17px;
+    accent-color:var(--mint);
+    cursor:pointer;
+  }
+  .checkbox-row label{
+    font-size:0.85rem;
+    color:var(--choc-soft);
+    cursor:pointer;
+  }
+
+  .progress-banner{
+    text-align:center;
+    font-size:0.88rem;
+    color:var(--choc-soft);
+    margin-bottom:18px;
+    font-style:italic;
+  }
+
+  /* Flashcards */
+  .flash-controls{
+    display:flex;
+    gap:8px;
+    justify-content:center;
+    margin-bottom:18px;
+    flex-wrap:wrap;
+  }
+  .flash-controls select{
+    font-family:inherit;
+    font-size:0.85rem;
+    padding:8px 12px;
+    border-radius:8px;
+    border:1.5px solid var(--line);
+    background:var(--paper);
+    color:var(--choc);
+  }
+  .deck-stats{
+    text-align:center;
+    font-size:0.85rem;
+    color:var(--choc-soft);
+    margin-bottom:14px;
+  }
+  .flashcard-stage{
+    perspective:1200px;
+    max-width:560px;
+    margin:0 auto 20px;
+    height:280px;
+  }
+  .flashcard{
+    position:relative;
+    width:100%;
+    height:100%;
+    cursor:pointer;
+    transform-style:preserve-3d;
+    transition:transform 0.5s cubic-bezier(.4,.2,.2,1);
+  }
+  .flashcard.flipped{transform:rotateY(180deg);}
+  .face{
+    position:absolute;
+    inset:0;
+    backface-visibility:hidden;
+    border-radius:16px;
+    padding:28px;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    align-items:center;
+    text-align:center;
+    box-shadow:0 6px 18px var(--shadow);
+    border:1px solid var(--line);
+  }
+  .face.front{
+    background:var(--paper);
+  }
+  .face.back{
+    background:var(--choc);
+    color:var(--cream);
+    transform:rotateY(180deg);
+  }
+  .face .cat{
+    font-size:0.72rem;
+    text-transform:uppercase;
+    letter-spacing:0.08em;
+    color:var(--strawberry);
+    margin-bottom:14px;
+  }
+  .face.back .cat{color:var(--butterscotch);}
+  .face .qtext{
+    font-size:1.15rem;
+    line-height:1.4;
+  }
+  .face .atext{
+    font-size:1.05rem;
+    line-height:1.55;
+    white-space:pre-line;
+  }
+  .flip-hint{
+    text-align:center;
+    font-size:0.78rem;
+    color:var(--choc-soft);
+    font-style:italic;
+    margin-bottom:18px;
+  }
+
+  .rate-row{
+    display:flex;
+    gap:10px;
+    justify-content:center;
+    flex-wrap:wrap;
+  }
+  .rate-row button{
+    font-family:inherit;
+    font-size:0.9rem;
+    padding:11px 20px;
+    border-radius:10px;
+    border:none;
+    cursor:pointer;
+    color:#fff;
+    transition:opacity 0.15s;
+  }
+  .rate-row button:hover{opacity:0.85;}
+  .btn-again{background:#C25B4A;}
+  .btn-hard{background:var(--butterscotch);}
+  .btn-good{background:var(--mint);}
+  .btn-easy{background:var(--choc);}
+
+  .deck-empty{
+    text-align:center;
+    padding:50px 20px;
+    color:var(--choc-soft);
+    font-style:italic;
+  }
+
+  .reset-link{
+    display:block;
+    text-align:center;
+    margin-top:22px;
+    font-size:0.8rem;
+    color:var(--choc-soft);
+    text-decoration:underline;
+    cursor:pointer;
+    background:none;
+    border:none;
+    font-family:inherit;
+  }
+
+  .storage-row{
+    display:flex;
+    gap:10px;
+    justify-content:center;
+    flex-wrap:wrap;
+    margin-top:18px;
+  }
+  .storage-row button{
+    font-family:inherit;
+    font-size:0.82rem;
+    padding:9px 16px;
+    border-radius:8px;
+    border:1.5px solid var(--line);
+    background:var(--paper);
+    color:var(--choc-soft);
+    cursor:pointer;
+  }
+  .storage-row button:hover{border-color:var(--choc-soft); color:var(--choc);}
+  #import-file-input{display:none;}
+  .save-toast{
+    position:fixed;
+    bottom:20px;
+    left:50%;
+    transform:translateX(-50%) translateY(20px);
+    background:var(--choc);
+    color:var(--cream);
+    padding:10px 20px;
+    border-radius:999px;
+    font-size:0.85rem;
+    opacity:0;
+    transition:opacity 0.25s, transform 0.25s;
+    pointer-events:none;
+    z-index:50;
+  }
+  .save-toast.show{
+    opacity:1;
+    transform:translateX(-50%) translateY(0);
+  }
+
+  footer{
+    text-align:center;
+    margin-top:40px;
+    font-size:0.78rem;
+    color:var(--choc-soft);
+    opacity:0.7;
+  }
+
+  @media (max-width:480px){
+    h1{font-size:1.6rem;}
+    .flashcard-stage{height:320px;}
+    .face{padding:20px;}
+  }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+  <header>
+    <div class="scoop-row">
+      <div class="scoop" style="background:var(--butterscotch);"></div>
+      <div class="scoop" style="background:var(--strawberry);"></div>
+      <div class="scoop" style="background:var(--mint);"></div>
+    </div>
+    <h1>Whitey's Crash Course</h1>
+    <p class="subhead">Two days, one hour each. Then it's yours.</p>
+  </header>
+
+  <nav class="tabs">
+    <button class="tab-btn active" data-view="study">Study Plan</button>
+    <button class="tab-btn" data-view="flash">Flashcard Drill</button>
+  </nav>
+
+  <!-- STUDY VIEW -->
+  <section id="view-study" class="view active">
+
+    <div class="day-toggle">
+      <button class="day-btn active" data-day="1">Day 1</button>
+      <button class="day-btn" data-day="2">Day 2</button>
+    </div>
+
+    <div id="progress-banner" class="progress-banner"></div>
+
+    <div id="day1-content">
+      <div class="card">
+        <h2>Shakes &amp; Malts <span class="minutes">20 min</span></h2>
+        <span class="tag high">Highest frequency</span>
+        <ul>
+          <li><strong>Malt = shake + 1 heaping spoon malt powder</strong> (that's the only difference — malts are sweeter).</li>
+          <li>Build order: <strong>2 scoops Malt Mix (MM) first</strong> → then flavoring → mix fast. Add MM ASAP so you don't overmix.</li>
+          <li>Regular flavors by size (S/M/L): <strong>1½ / 2 / 3</strong> scoops. Cut back: <strong>1 / 1½ / 2</strong>.</li>
+          <li>Hot Fudge shakes (S/M/L): <strong>2 / 3 / 4</strong>. Cut back: <strong>1½ / 2 / 3</strong>.</li>
+          <li>Banana shake: dash of vanilla + small/medium/medium banana by size. With flavor: cut back flavoring, always ½ banana.</li>
+          <li>Thin shake requested? Ask how thin, then add milk accordingly.</li>
+        </ul>
+        <div class="trick">Memory trick: "1½ – 2 – 3" is the default scoop ladder for regular size shakes — it echoes across sodas and flavored shakes too.</div>
+        <div class="checkbox-row">
+          <input type="checkbox" id="chk-d1-shakes">
+          <label for="chk-d1-shakes">I can explain this out loud without looking</label>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>Sundaes <span class="minutes">20 min</span></h2>
+        <span class="tag high">Highest frequency</span>
+        <ul>
+          <li>Chocolate, Butterscotch, Marshmallow = <strong>UOJ</strong> (use your own judgment).</li>
+          <li>Fruit flavors — Strawberry, Pineapple, Peach, Red Raspberry (1/2/3 dip): <strong>1½ / 2 / 3</strong>. Use plenty of fruit.</li>
+          <li>Hot Fudge (1/2/3 dip): <strong>3 / 5 / 7</strong>.</li>
+          <li>Cup rule: 1 Dip → one dip cup; 2 Dip → two dip cup; 3 Dip → large shake cup or boat.</li>
+          <li><strong>All sundaes must be weighed.</strong> Default to vanilla ice cream unless told otherwise — no upcharge for other flavors.</li>
+        </ul>
+        <div class="checkbox-row">
+          <input type="checkbox" id="chk-d1-sundaes">
+          <label for="chk-d1-sundaes">I can explain this out loud without looking</label>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>Ice Cream Sodas <span class="minutes">20 min</span></h2>
+        <span class="tag med">Frequent</span>
+        <ul>
+          <li>1 Dip → medium cup. 2 &amp; 3 Dip → large cup.</li>
+          <li>Order: flavoring in first → stir with a metal spoon → vanilla ice cream added over the sink → top off with carbonated water.</li>
+          <li>Flavorings ending in <strong>-BERRY or -APPLE</strong> (1/2/3 dip): <strong>4 / 5 / 5</strong>. All other flavorings: <strong>2 / 3 / 3</strong>.</li>
+          <li>Half and Half is always <strong>2 Tbsp</strong>, regardless of size.</li>
+          <li>Fill line: "top of the i" in the Whitey's logo for 1 &amp; 2 dip; "top of the Ice Cream" wording for 3 dip.</li>
+          <li>Small soda in large cup: use the large recipe/procedure but only one scoop of ice cream, charge for 1 dip, press "small soda in large cup" button.</li>
+        </ul>
+        <div class="checkbox-row">
+          <input type="checkbox" id="chk-d1-sodas">
+          <label for="chk-d1-sodas">I can explain this out loud without looking</label>
+        </div>
+      </div>
+    </div>
+
+    <div id="day2-content" style="display:none;">
+      <div class="card">
+        <h2>Banana Splits <span class="minutes">20 min</span></h2>
+        <span class="tag med">Frequent</span>
+        <ul>
+          <li><strong>Banana always goes on before toppings — no exceptions.</strong></li>
+          <li>1 Dip: 6oz vanilla + half a medium banana, same topping amount as a 1 Dip sundae.</li>
+          <li>2 Dip: 4oz vanilla + 4oz strawberry, whole banana, 1 scoop pineapple + 1 scoop strawberry topping.</li>
+          <li>3 Dip (traditional): adds 4oz chocolate dip + ½ pump chocolate topping to the 2 Dip build.</li>
+          <li>Stacking order bottom to top: ice cream dip(s) → sliced banana → fruit toppings (matched to their own flavor dip) → whipped cream → nuts → cherry.</li>
+          <li>Boat version: same toppings/amounts as the cup — just cut the banana lengthwise instead of slicing thin.</li>
+        </ul>
+        <div class="checkbox-row">
+          <input type="checkbox" id="chk-d2-splits">
+          <label for="chk-d2-splits">I can explain this out loud without looking</label>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>Special Sundaes &amp; Bostons <span class="minutes">20 min</span></h2>
+        <span class="tag med">Frequent</span>
+        <ul>
+          <li>Special sundaes: 1 Dip → 8oz cup; 2 Dip → 16oz cup (unless otherwise noted).</li>
+          <li>Learn the shape, not every number — <strong>Turtle</strong> (butterscotch + hot fudge + pecans), <strong>S'mores</strong> (marshmallow + hot fudge + choc chips, graham ice cream), <strong>Cherry Bon Bon</strong> (hot fudge + black cherry), <strong>Dusty Road</strong> (chocolate + malt powder), <strong>Brownie Under</strong> (brownie on bottom, then ice cream + fudge, repeat for 2 dip).</li>
+          <li>Bostons = shake/malt + a sundae on top. <strong>Large only.</strong></li>
+          <li>5 Rules for Bostons: 1) large only  2) use the large shake recipe  3) fill to the apostrophe  4) 4oz dip on top  5) 1 scoop/pump topping (2 for Hot Fudge).</li>
+          <li>If the shake portion uses a flavored ice cream, press the "Ice Cream Boston" button <strong>in addition to</strong> one of the three Boston buttons.</li>
+        </ul>
+        <div class="checkbox-row">
+          <input type="checkbox" id="chk-d2-specials">
+          <label for="chk-d2-specials">I can explain this out loud without looking</label>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>Freezes, Floats, Cones &amp; Packages <span class="minutes">20 min</span></h2>
+        <span class="tag low">Lower frequency — just get the gist</span>
+        <ul>
+          <li>Regular Freeze: <strong>large only</strong>. 2 large dips + 4 MM + a touch of carbonated water, mixed and spun off in stages.</li>
+          <li>Sherbet Freeze comes in all 3 sizes (S/M/L dips: 2/3/4; cut back flavoring: 1/1.5/2).</li>
+          <li>Pop float: fill cup with pop, carefully add ice cream over sink, top off with more pop.</li>
+          <li>Slush float: fill ¼–½ with slush, add vanilla ice cream, top with more slush around the edges.</li>
+          <li>Cone weights: Mini 2oz, One Dip 4-5oz, Two Dip 8oz, Three Dip 12oz, Flavor Flight = four 2oz dips in a banana boat.</li>
+          <li>Pup cup = mini dip of vanilla + dog bone on top, mini dip cup.</li>
+          <li>Packages: Pints and Quarts can be hand-packed; 1.5 Quarts and 4 Qt pails are prepackaged only.</li>
+        </ul>
+        <div class="checkbox-row">
+          <input type="checkbox" id="chk-d2-misc">
+          <label for="chk-d2-misc">I can explain this out loud without looking</label>
+        </div>
+      </div>
+    </div>
+
+    <button class="reset-link" id="reset-checks">Reset checkmarks</button>
+  </section>
+
+  <!-- FLASHCARD VIEW -->
+  <section id="view-flash" class="view">
+
+    <div class="card" id="week-plan-card" style="margin-bottom:20px;">
+      <h2 style="margin-bottom:10px;">Shakes &amp; Malts — 7 Day Plan</h2>
+      <div id="week-setup" style="display:none;">
+        <p style="font-size:0.92rem; color:var(--choc-soft); margin:0 0 12px;">
+          You've got 79 cards on Shakes &amp; Malts, split across 7 days (~11-12/day). Set your start date to track your schedule — you can still jump to any day's batch anytime, on-schedule or ahead.
+        </p>
+        <div style="display:flex; gap:10px; align-items:center; justify-content:center; flex-wrap:wrap;">
+          <input type="date" id="week-start-input" style="font-family:inherit; font-size:0.9rem; padding:8px 10px; border-radius:8px; border:1.5px solid var(--line);">
+          <button id="week-start-btn" style="font-family:inherit; font-size:0.88rem; padding:9px 18px; border-radius:8px; border:none; background:var(--strawberry); color:#fff; cursor:pointer;">Start my 7 days</button>
+        </div>
+      </div>
+      <div id="week-active" style="display:none;">
+        <div id="week-day-grid" style="display:flex; gap:6px; justify-content:center; flex-wrap:wrap; margin-bottom:12px;"></div>
+        <p id="week-status-text" style="text-align:center; font-size:0.9rem; color:var(--choc-soft); margin:0;"></p>
+        <button class="reset-link" id="week-reset-btn" style="margin-top:10px;">Reset week / change start date</button>
+      </div>
+    </div>
+
+    <div class="flash-controls">
+      <select id="deck-filter">
+        <option value="all">All categories</option>
+        <option value="Shakes & Malts">Shakes &amp; Malts</option>
+        <option value="Sundaes">Sundaes</option>
+        <option value="Ice Cream Sodas">Ice Cream Sodas</option>
+        <option value="Banana Splits">Banana Splits</option>
+        <option value="Special Sundaes">Special Sundaes</option>
+        <option value="Bostons">Bostons</option>
+        <option value="Freezes & Floats">Freezes &amp; Floats</option>
+        <option value="Cones & Packages">Cones &amp; Packages</option>
+        <option value="Ice Cream Flavors">Ice Cream Flavors</option>
+      </select>
+      <select id="deck-mode">
+        <option value="due">Due for review</option>
+        <option value="all">Every card</option>
+        <option value="missed">Cards I've marked Again/Hard</option>
+      </select>
+    </div>
+    <div class="flash-controls">
+      <label style="display:flex;align-items:center;gap:7px;font-size:0.85rem;color:var(--choc-soft);cursor:pointer;">
+        <input type="checkbox" id="sizes-only-toggle" style="width:16px;height:16px;accent-color:var(--strawberry);cursor:pointer;">
+        Sizes only — just the numbers, no explanations
+      </label>
+      <label style="display:flex;align-items:center;gap:7px;font-size:0.85rem;color:var(--choc-soft);cursor:pointer;">
+        <input type="checkbox" id="week-mode-toggle" style="width:16px;height:16px;accent-color:var(--mint);cursor:pointer;">
+        Shakes &amp; Malts — specific day's batch
+      </label>
+      <select id="week-day-picker" style="display:none; font-family:inherit; font-size:0.85rem; padding:7px 10px; border-radius:8px; border:1.5px solid var(--line); background:var(--paper); color:var(--choc);"></select>
+      <label style="display:flex;align-items:center;gap:7px;font-size:0.85rem;color:var(--choc-soft);cursor:pointer;">
+        <input type="checkbox" id="popular-only-toggle" style="width:16px;height:16px;accent-color:var(--butterscotch);cursor:pointer;">
+        Ice Cream Flavors — popular ones first
+      </label>
+    </div>
+    <p id="popular-note" style="display:none; text-align:center; font-size:0.78rem; color:var(--choc-soft); font-style:italic; max-width:560px; margin:0 auto 14px;">
+      Based on Whitey's own co-CEOs naming these as their most popular in a 2023 trade-press interview — it's 8 named flavors, not a ranked list of all 37, so treat the rest as "unranked," not "unpopular."
+    </p>
+
+    <div id="deck-stats" class="deck-stats"></div>
+
+
+    <div id="flash-active">
+      <div class="flashcard-stage">
+        <div class="flashcard" id="flashcard">
+          <div class="face front">
+            <div class="cat" id="cat-front">Category</div>
+            <div class="qtext" id="qtext">Question</div>
+          </div>
+          <div class="face back">
+            <div class="cat" id="cat-back">Category</div>
+            <div class="atext" id="atext">Answer</div>
+          </div>
+        </div>
+      </div>
+      <div class="flip-hint">Tap the card to flip</div>
+      <div class="rate-row">
+        <button class="btn-again" data-rate="again">Again</button>
+        <button class="btn-hard" data-rate="hard">Hard</button>
+        <button class="btn-good" data-rate="good">Good</button>
+        <button class="btn-easy" data-rate="easy">Easy</button>
+      </div>
+    </div>
+
+    <div id="flash-empty" class="deck-empty" style="display:none;">
+      Nothing due in this deck right now — nice work.<br>Switch "Every card" above to keep drilling anyway.
+    </div>
+
+    <div class="storage-row">
+      <button id="export-btn">Export progress as file</button>
+      <button id="import-btn">Import progress from file</button>
+      <input type="file" id="import-file-input" accept="application/json">
+    </div>
+    <button class="reset-link" id="reset-progress">Reset all flashcard progress</button>
+  </section>
+
+  <footer>Whitey's Ice Cream — Recipe Guide, Rev. Jan '25 — study companion</footer>
+</div>
+
+<div class="save-toast" id="save-toast"></div>
+
+<script>
+// ---------- TAB SWITCHING ----------
+document.querySelectorAll('.tab-btn').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+    document.getElementById('view-'+btn.dataset.view).classList.add('active');
+  });
+});
+
+// ---------- DAY TOGGLE ----------
+document.querySelectorAll('.day-btn').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    document.querySelectorAll('.day-btn').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('day1-content').style.display = btn.dataset.day==='1' ? 'block':'none';
+    document.getElementById('day2-content').style.display = btn.dataset.day==='2' ? 'block':'none';
+    updateProgressBanner();
+  });
+});
+
+// ---------- PERSISTENT STORAGE (localStorage) ----------
+const STORAGE_KEY = 'whiteys-crash-course-progress-v1';
+
+function showToast(msg){
+  const t = document.getElementById('save-toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(showToast._timer);
+  showToast._timer = setTimeout(()=>t.classList.remove('show'), 1800);
+}
+
+function loadStoredProgress(){
+  try{
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if(!raw) return null;
+    return JSON.parse(raw);
+  }catch(e){
+    console.warn('Could not read stored progress', e);
+    return null;
+  }
+}
+
+function saveProgressToStorage(){
+  const checkboxes = {};
+  checkIds.forEach(id=>{
+    const el = document.getElementById(id);
+    if(el) checkboxes[id] = el.checked;
+  });
+  const flashcards = deck.map((card,i)=>({
+    question: card.q,
+    category: card.cat,
+    box: cardState[i].box,
+    dueDate: cardState[i].dueDate,
+    lastRating: cardState[i].lastRating
+  }));
+  const payload = {
+    savedAt: new Date().toISOString(),
+    checkboxes,
+    flashcards
+  };
+  try{
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
+  }catch(e){
+    console.warn('Could not save progress', e);
+  }
+  return payload;
+}
+
+// Merge an imported/stored payload into live state by matching on question text
+// (robust to reordering — doesn't assume array index alignment)
+function applyProgressPayload(payload){
+  if(!payload) return {matched:0, total:0};
+  let matched = 0;
+
+  if(payload.checkboxes){
+    checkIds.forEach(id=>{
+      if(id in payload.checkboxes){
+        const el = document.getElementById(id);
+        if(el) el.checked = !!payload.checkboxes[id];
+      }
+    });
+  }
+
+  if(Array.isArray(payload.flashcards)){
+    const byQuestion = new Map(payload.flashcards.map(fc=>[fc.question, fc]));
+    deck.forEach((card,i)=>{
+      const found = byQuestion.get(card.q);
+      if(found){
+        cardState[i].box = typeof found.box==='number' ? found.box : cardState[i].box;
+        // Back-compat: older exports used a boolean "dueNow" instead of a real due date.
+        if(typeof found.dueDate === 'string' || found.dueDate === null){
+          cardState[i].dueDate = found.dueDate;
+        } else if(typeof found.dueNow === 'boolean'){
+          cardState[i].dueDate = found.dueNow ? null : addDays(todayStr(), 1);
+        }
+        cardState[i].lastRating = found.lastRating ?? cardState[i].lastRating;
+        matched++;
+      }
+    });
+  }
+  return {matched, total: deck.length};
+}
+
+
+// ---------- CHECKBOX PROGRESS ----------
+const checkIds = ['chk-d1-shakes','chk-d1-sundaes','chk-d1-sodas','chk-d2-splits','chk-d2-specials','chk-d2-misc'];
+function updateProgressBanner(){
+  const checked = checkIds.filter(id=>document.getElementById(id).checked).length;
+  const banner = document.getElementById('progress-banner');
+  banner.textContent = checked===0 ? "Check items off as you drill them out loud."
+    : checked===checkIds.length ? "All sections marked confident. Go take the flashcard drill."
+    : `${checked} of ${checkIds.length} sections marked confident.`;
+}
+checkIds.forEach(id=>document.getElementById(id).addEventListener('change', ()=>{
+  updateProgressBanner();
+  saveProgressToStorage();
+  showToast('Saved');
+}));
+document.getElementById('reset-checks').addEventListener('click',()=>{
+  checkIds.forEach(id=>document.getElementById(id).checked=false);
+  updateProgressBanner();
+  saveProgressToStorage();
+  showToast('Saved');
+});
+updateProgressBanner();
+
+// ---------- FLASHCARD DECK ----------
+const deck = [
+  // ============================================================
+  // SHAKES & MALTS — WEEK 1 FOCUS
+  // Phrased like manager pop-quizzes: "How much X for a Y shake"
+  // Day numbers assigned later in JS by splitting this block evenly.
+  // ============================================================
+
+  // --- Core concept cards (Day 1) ---
+  {cat:"Shakes & Malts", q:"What's the ONE difference between a shake and a malt?", a:"A malt = shake + 1 heaping spoon of malt powder. That's it."},
+  {cat:"Shakes & Malts", q:"What are the first two things that go into any regular shake, in order?", a:"1) 2 scoops Malt Mix (MM)\n2) The flavoring"},
+  {cat:"Shakes & Malts", q:"Why do you add Malt Mix ASAP once you start mixing?", a:"To make sure you don't overmix."},
+  {cat:"Shakes & Malts", q:"Customer wants a thin shake — what do you do?", a:"Ask how thin they want it, then add milk accordingly."},
+  {cat:"Shakes & Malts", q:"For a flavored ice cream shake, what's different about how you start it?", a:"You start with a specific number of scoops of an ice cream cone flavor instead of MM+flavoring first. Rest of the process is the same."},
+
+  // --- Regular Priced Shakes/Malts (applies to: Vanilla, Chocolate, Strawberry, Peach, Pineapple,
+  //     Red Raspberry, Butterscotch, Black Raspberry, Blueberry, Lemon, Orange, Lime, Cherry,
+  //     Root Beer, Kona Coffee, Marshmallow, Peanut Butter, Crème de Menthe) ---
+  // NOTE: the sheet doesn't print a unit word for these flavoring counts. These are liquid/syrup
+  // flavorings dispensed from a pump, so "pumps" is the most likely unit — but it's an inference,
+  // not printed on the sheet. Confirm the actual word your manager/coworkers use on shift.
+  {cat:"Shakes & Malts", fullRecipe:true, q:"FULL RECIPE — Regular flavored shake (Vanilla, Chocolate, Strawberry, Peach, Pineapple, Red Raspberry, Butterscotch, Black Raspberry, Blueberry, Lemon, Orange, Lime, Cherry, Root Beer, Kona Coffee, Marshmallow, Peanut Butter, Crème de Menthe) — everything, all sizes?", a:"Build order: 2 scoops MM, then flavoring, mix (add MM ASAP to avoid overmixing).\n\nFlavoring (inferred unit: pumps — sheet gives bare numbers):\nSmall: 1½ | Medium: 2 | Large: 3\n\nCut back flavoring:\nSmall: 1 | Medium: 1½ | Large: 2"},
+  {cat:"Shakes & Malts", sizeOnly:true, q:"How much flavoring for a SMALL regular shake (vanilla, chocolate, strawberry, etc.)?", a:"1½ pumps (inferred unit — sheet just says \"1½\"; confirm the word used on shift)"},
+  {cat:"Shakes & Malts", sizeOnly:true, q:"How much flavoring for a MEDIUM regular shake?", a:"2 pumps (inferred unit — sheet just says \"2\"; confirm on shift)"},
+  {cat:"Shakes & Malts", sizeOnly:true, q:"How much flavoring for a LARGE regular shake?", a:"3 pumps (inferred unit — sheet just says \"3\"; confirm on shift)"},
+  {cat:"Shakes & Malts", sizeOnly:true, q:"Cut back flavoring for a SMALL regular shake?", a:"1 pump (inferred unit; sheet just says \"1\")"},
+  {cat:"Shakes & Malts", sizeOnly:true, q:"Cut back flavoring for a MEDIUM regular shake?", a:"1½ pumps (inferred unit; sheet just says \"1½\")"},
+  {cat:"Shakes & Malts", sizeOnly:true, q:"Cut back flavoring for a LARGE regular shake?", a:"2 pumps (inferred unit; sheet just says \"2\")"},
+
+  // --- Hot Fudge shake --- (same caveat: sheet prints bare numbers, no unit word)
+  {cat:"Shakes & Malts", fullRecipe:true, q:"FULL RECIPE — Hot Fudge shake — everything, all sizes?", a:"Build order: 2 scoops MM, then Hot Fudge, mix.\n\nHot Fudge (inferred unit: pumps):\nSmall: 2 | Medium: 3 | Large: 4\n\nCut back Hot Fudge:\nSmall: 1½ | Medium: 2 | Large: 3"},
+  {cat:"Shakes & Malts", sizeOnly:true, q:"How much Hot Fudge for a SMALL shake?", a:"2 pumps (inferred unit — sheet just says \"2\"; confirm on shift)"},
+  {cat:"Shakes & Malts", sizeOnly:true, q:"How much Hot Fudge for a MEDIUM shake?", a:"3 pumps (inferred unit — sheet just says \"3\"; confirm on shift)"},
+  {cat:"Shakes & Malts", sizeOnly:true, q:"How much Hot Fudge for a LARGE shake?", a:"4 pumps (inferred unit — sheet just says \"4\"; confirm on shift)"},
+  {cat:"Shakes & Malts", sizeOnly:true, q:"Cut back Hot Fudge for a SMALL shake?", a:"1½ pumps (inferred unit; sheet just says \"1½\")"},
+  {cat:"Shakes & Malts", sizeOnly:true, q:"Cut back Hot Fudge for a MEDIUM shake?", a:"2 pumps (inferred unit; sheet just says \"2\")"},
+  {cat:"Shakes & Malts", sizeOnly:true, q:"Cut back Hot Fudge for a LARGE shake?", a:"3 pumps (inferred unit; sheet just says \"3\")"},
+
+  // --- Cake Batter shake --- (sheet explicitly labels "Powder" and "Liquid" — no further unit given)
+  {cat:"Shakes & Malts", fullRecipe:true, q:"FULL RECIPE — Cake Batter shake — everything, all sizes?", a:"Small: ¾ powder, ¾ liquid\nMedium: 1 powder, 1 liquid\nLarge: 1 powder, 2 liquid\n\nInclude sprinkles on top if desired."},
+  {cat:"Shakes & Malts", sizeOnly:true, q:"Cake Batter shake, SMALL — how much powder and how much liquid?", a:"¾ powder, ¾ liquid (sheet doesn't specify scoop/oz — just \"powder\"/\"liquid\" amounts)"},
+  {cat:"Shakes & Malts", sizeOnly:true, q:"Cake Batter shake, MEDIUM — how much powder and how much liquid?", a:"1 powder, 1 liquid"},
+  {cat:"Shakes & Malts", sizeOnly:true, q:"Cake Batter shake, LARGE — how much powder and how much liquid?", a:"1 powder, 2 liquid"},
+  {cat:"Shakes & Malts", q:"What do you add on top of a Cake Batter shake, if desired?", a:"Sprinkles"},
+
+  // --- Banana shake --- (explicit units: banana sizes, ½ banana)
+  {cat:"Shakes & Malts", fullRecipe:true, q:"FULL RECIPE — Banana shake — plain AND with another flavor, all sizes?", a:"Plain banana shake: dash of vanilla + banana.\nSmall: 1 small banana | Medium: 1 medium banana | Large: 1 medium banana\n\nBanana WITH another flavor added: cut back the flavoring, and use ½ banana regardless of size."},
+  {cat:"Shakes & Malts", q:"Plain banana shake (no other flavor) — what always goes in besides the banana?", a:"A dash of vanilla"},
+  {cat:"Shakes & Malts", sizeOnly:true, q:"Plain banana shake, SMALL — what size banana?", a:"1 small banana"},
+  {cat:"Shakes & Malts", sizeOnly:true, q:"Plain banana shake, MEDIUM — what size banana?", a:"1 medium banana"},
+  {cat:"Shakes & Malts", sizeOnly:true, q:"Plain banana shake, LARGE — what size banana?", a:"1 medium banana"},
+  {cat:"Shakes & Malts", sizeOnly:true, q:"Banana shake WITH another flavor added — how much banana, any size?", a:"½ banana, regardless of size"},
+  {cat:"Shakes & Malts", q:"Banana shake WITH another flavor — what do you do to the flavoring amount?", a:"Cut it back"},
+
+  // --- Register / extras rule ---
+  {cat:"Shakes & Malts", q:"Someone adds Hot Fudge, Cake Batter, or half a banana to a Special, Deluxe, or Flavored ice cream shake — what register step?", a:"Press Misc. Extras, use the $0.40 extra button"},
+
+  // --- Special Priced Shakes/Malts: Black Cherry --- (bare numbers on sheet, same flavoring/pump caveat)
+  {cat:"Shakes & Malts", fullRecipe:true, q:"FULL RECIPE — Black Cherry shake — everything, all sizes?", a:"Build order: 2 scoops MM, then flavoring.\n\nBlack Cherry (inferred unit: pumps):\nSmall: 1½ | Medium: 2 | Large: 3\n\nCut back:\nSmall: 1 | Medium: 1½ | Large: 2"},
+  {cat:"Shakes & Malts", sizeOnly:true, q:"Black Cherry shake, SMALL — how much?", a:"1½ pumps (inferred unit — sheet just says \"1½\")"},
+  {cat:"Shakes & Malts", sizeOnly:true, q:"Black Cherry shake, MEDIUM — how much?", a:"2 pumps (inferred unit — sheet just says \"2\")"},
+  {cat:"Shakes & Malts", sizeOnly:true, q:"Black Cherry shake, LARGE — how much?", a:"3 pumps (inferred unit — sheet just says \"3\")"},
+  {cat:"Shakes & Malts", sizeOnly:true, q:"Black Cherry shake cut back, SMALL?", a:"1 pump (inferred unit; sheet just says \"1\")"},
+  {cat:"Shakes & Malts", sizeOnly:true, q:"Black Cherry shake cut back, MEDIUM?", a:"1½ pumps (inferred unit; sheet just says \"1½\")"},
+  {cat:"Shakes & Malts", sizeOnly:true, q:"Black Cherry shake cut back, LARGE?", a:"2 pumps (inferred unit; sheet just says \"2\")"},
+
+  // --- Butterfinger/Snickers/M&M's/Heath --- (sheet explicitly says "heaping scoops")
+  {cat:"Shakes & Malts", fullRecipe:true, q:"FULL RECIPE — Butterfinger/Snickers/M&M's/Heath shake — everything, all sizes?", a:"Scoops (heaping):\nSmall: 2 | Medium: 2 | Large: 3\n\nAlways offer vanilla or chocolate flavoring, and use cut back on that flavoring.\n\nExtra scoop added: 1 heaping scoop."},
+  {cat:"Shakes & Malts", sizeOnly:true, q:"Butterfinger/Snickers/M&M's/Heath shake, SMALL — how many scoops?", a:"2 heaping scoops"},
+  {cat:"Shakes & Malts", sizeOnly:true, q:"Butterfinger/Snickers/M&M's/Heath shake, MEDIUM — how many scoops?", a:"2 heaping scoops"},
+  {cat:"Shakes & Malts", sizeOnly:true, q:"Butterfinger/Snickers/M&M's/Heath shake, LARGE — how many scoops?", a:"3 heaping scoops"},
+  {cat:"Shakes & Malts", q:"For Butterfinger/Snickers/M&M's/Heath shakes, what do you always offer the customer?", a:"Vanilla or chocolate flavoring, and use cut back on that flavoring"},
+  {cat:"Shakes & Malts", q:"Extra scoop of Butterfinger/Snickers/M&M's/Heath/CCCD/Choc Chips added to a shake — how much?", a:"1 heaping scoop"},
+
+  // --- Oreo shake --- (explicit: countable Oreos)
+  {cat:"Shakes & Malts", fullRecipe:true, q:"FULL RECIPE — Oreo shake — everything, all sizes?", a:"4 Oreos inside, 1 Oreo on top — same for Small, Medium, and Large.\n\nAlways offer vanilla or chocolate flavoring, and use cut back on that flavoring.\n\nExtra Oreo added: charged per Oreo."},
+  {cat:"Shakes & Malts", sizeOnly:true, q:"Oreo shake — how many Oreos go inside, any size?", a:"4 Oreos inside"},
+  {cat:"Shakes & Malts", sizeOnly:true, q:"Oreo shake — how many Oreos go on top, any size?", a:"1 Oreo on top"},
+  {cat:"Shakes & Malts", sizeOnly:true, q:"Oreo shake — does the inside/top amount change by size?", a:"No — 4 Oreos inside, 1 Oreo on top for S, M, and L"},
+  {cat:"Shakes & Malts", q:"For an Oreo shake, what do you always offer the customer?", a:"Vanilla or chocolate flavoring, and use cut back on that flavoring"},
+  {cat:"Shakes & Malts", q:"Extra Oreo added to a shake — how is it charged/measured?", a:"Charged per Oreo (each additional cookie)"},
+
+  // --- Candy Bar (Reese's PB Cups, Kit Kat) --- (explicit: package)
+  {cat:"Shakes & Malts", fullRecipe:true, q:"FULL RECIPE — Candy Bar shake (Reese's PB Cups, Kit Kat) — everything, all sizes?", a:"1 package — same for Small, Medium, and Large.\n\nAlways offer vanilla or chocolate flavoring, and use cut back on that flavoring.\n\nExtra candy bar added: full amount (one full package), rung up as Add Special."},
+  {cat:"Shakes & Malts", sizeOnly:true, q:"Candy Bar shake (Reese's PB Cups, Kit Kat), any size — how much?", a:"1 package, all sizes (S/M/L all the same)"},
+  {cat:"Shakes & Malts", q:"For Candy Bar shakes, what do you always offer the customer?", a:"Vanilla or chocolate flavoring, and use cut back on that flavoring"},
+  {cat:"Shakes & Malts", q:"Extra candy bar added to a shake — how is it charged?", a:"Full amount (one full package), rung up as Add Special"},
+
+  // --- Chocolate Chip Cookie Dough (CCCD) --- (Butterscotch = same pump caveat; CCCD dough = countable scoops)
+  {cat:"Shakes & Malts", fullRecipe:true, q:"FULL RECIPE — CCCD (Chocolate Chip Cookie Dough) shake — everything, all sizes?", a:"Butterscotch (inferred unit: pumps) / CCCD scoops inside:\nSmall: 1 Butterscotch, 2 CCCD | Medium: 1½ Butterscotch, 2 CCCD | Large: 2 Butterscotch, 3 CCCD\n\nUse the candy scoop for the CCCD.\nSprinkle CCCD on top — not a full scoop."},
+  {cat:"Shakes & Malts", sizeOnly:true, q:"CCCD shake, SMALL — how much Butterscotch and how much CCCD?", a:"1 pump Butterscotch (inferred unit), 2 scoops CCCD inside"},
+  {cat:"Shakes & Malts", sizeOnly:true, q:"CCCD shake, MEDIUM — how much Butterscotch and how much CCCD?", a:"1½ pumps Butterscotch (inferred unit), 2 scoops CCCD inside"},
+  {cat:"Shakes & Malts", sizeOnly:true, q:"CCCD shake, LARGE — how much Butterscotch and how much CCCD?", a:"2 pumps Butterscotch (inferred unit), 3 scoops CCCD inside"},
+  {cat:"Shakes & Malts", q:"CCCD shake — what scoop do you use?", a:"The candy scoop (smaller scoop, not the regular ice cream dip scoop)"},
+  {cat:"Shakes & Malts", q:"CCCD shake — do you sprinkle it on top or use a full scoop on top?", a:"Sprinkle CCCD on top — not a full scoop"},
+
+  // --- Deluxe: Turtle Shake --- (Butterscotch/Hot Fudge = pump caveat; Pecans = "spoons," per sheet's own layout)
+  {cat:"Shakes & Malts", fullRecipe:true, q:"FULL RECIPE — Turtle Shake (Deluxe) — everything, all sizes?", a:"Small: ½ Butterscotch, 1½ Hot Fudge, 3 Pecans in, 1 Pecan on top\nMedium: ¾ Butterscotch, 2 Hot Fudge, 3 Pecans in, 1 Pecan on top\nLarge: 1 Butterscotch, 3 Hot Fudge, 4 Pecans in, 2 Pecans on top\n\n(Butterscotch/Hot Fudge units inferred as pumps; Pecans measured in spoons.)"},
+  {cat:"Shakes & Malts", sizeOnly:true, q:"Turtle Shake, SMALL — Butterscotch amount?", a:"½ pump (inferred unit — sheet just says \"½\")"},
+  {cat:"Shakes & Malts", sizeOnly:true, q:"Turtle Shake, SMALL — Hot Fudge amount?", a:"1½ pumps (inferred unit — sheet just says \"1½\")"},
+  {cat:"Shakes & Malts", sizeOnly:true, q:"Turtle Shake, SMALL — Pecans in / Pecans on top?", a:"3 spoons in, 1 spoon on top"},
+  {cat:"Shakes & Malts", sizeOnly:true, q:"Turtle Shake, MEDIUM — Butterscotch amount?", a:"¾ pump (inferred unit — sheet just says \"¾\")"},
+  {cat:"Shakes & Malts", sizeOnly:true, q:"Turtle Shake, MEDIUM — Hot Fudge amount?", a:"2 pumps (inferred unit — sheet just says \"2\")"},
+  {cat:"Shakes & Malts", sizeOnly:true, q:"Turtle Shake, MEDIUM — Pecans in / Pecans on top?", a:"3 spoons in, 1 spoon on top"},
+  {cat:"Shakes & Malts", sizeOnly:true, q:"Turtle Shake, LARGE — Butterscotch amount?", a:"1 pump (inferred unit — sheet just says \"1\")"},
+  {cat:"Shakes & Malts", sizeOnly:true, q:"Turtle Shake, LARGE — Hot Fudge amount?", a:"3 pumps (inferred unit — sheet just says \"3\")"},
+  {cat:"Shakes & Malts", sizeOnly:true, q:"Turtle Shake, LARGE — Pecans in / Pecans on top?", a:"4 spoons in, 2 spoons on top"},
+
+  // --- Deluxe: Brownie shake ---
+  {cat:"Shakes & Malts", fullRecipe:true, q:"FULL RECIPE — Brownie shake (Deluxe) — everything, all sizes?", a:"Cut the brownie into cubes; add it at the END of mixing to keep it chunky.\nCut back on flavoring — same for all sizes."},
+  {cat:"Shakes & Malts", q:"Brownie shake — how do you prep the brownie?", a:"Cut it into cubes"},
+  {cat:"Shakes & Malts", q:"Brownie shake — when do you add the brownie, and why?", a:"At the end of mixing, to keep it chunky"},
+  {cat:"Shakes & Malts", sizeOnly:true, q:"Brownie shake, any size — what do you do to the flavoring?", a:"Cut back on flavoring, all sizes"},
+
+  // --- Deluxe: Cherry Bon Bon shake --- (Hot Fudge = pump caveat; Black Cherry (Bl. Cherries) = pump caveat too)
+  {cat:"Shakes & Malts", fullRecipe:true, q:"FULL RECIPE — Cherry Bon Bon shake (Deluxe) — everything, all sizes?", a:"Small: 1½ Hot Fudge, ¾ Black Cherry\nMedium: 2 Hot Fudge, 1 Black Cherry\nLarge: 3 Hot Fudge, 1½ Black Cherry\n\n(Units inferred as pumps — sheet gives bare numbers.)"},
+  {cat:"Shakes & Malts", sizeOnly:true, q:"Cherry Bon Bon shake, SMALL — Hot Fudge / Black Cherry amounts?", a:"1½ pumps Hot Fudge, ¾ pump Black Cherry (inferred unit — sheet just gives bare numbers)"},
+  {cat:"Shakes & Malts", sizeOnly:true, q:"Cherry Bon Bon shake, MEDIUM — Hot Fudge / Black Cherry amounts?", a:"2 pumps Hot Fudge, 1 pump Black Cherry (inferred unit)"},
+  {cat:"Shakes & Malts", sizeOnly:true, q:"Cherry Bon Bon shake, LARGE — Hot Fudge / Black Cherry amounts?", a:"3 pumps Hot Fudge, 1½ pumps Black Cherry (inferred unit)"},
+
+  // --- Deluxe: Banana Split Shake (Large only) --- (explicit: scoops, spoons)
+  {cat:"Shakes & Malts", fullRecipe:true, q:"FULL RECIPE — Banana Split Shake (Deluxe, Large only) — everything?", a:"Large only.\n\nInside: Strawberry (1 scoop), Pineapple (1 scoop), Peach (1 scoop), Mixed Nuts (2 spoons) — filled to the apostrophe in the Whitey's logo.\n\nOn top: thinly sliced small banana (or ½ of a large banana), whipped cream to fill the cup, 1 spoon of mixed nuts, and 1 cherry."},
+  {cat:"Shakes & Malts", q:"What size does the Banana Split Shake come in?", a:"Large only"},
+  {cat:"Shakes & Malts", q:"Banana Split Shake — what three fruits go INSIDE the shake, and how much of each?", a:"Strawberry (1 scoop), Pineapple (1 scoop), Peach (1 scoop)"},
+  {cat:"Shakes & Malts", q:"Banana Split Shake — how many spoons of Mixed Nuts go inside?", a:"2 spoons"},
+  {cat:"Shakes & Malts", q:"Banana Split Shake — how far do you fill it while mixing inside ingredients?", a:"To the apostrophe in the Whitey's logo"},
+  {cat:"Shakes & Malts", q:"Banana Split Shake — what goes ON TOP (name all 4)?", a:"Thinly sliced small banana (or ½ of a large banana), whipped cream to fill the cup, 1 spoon of mixed nuts, and 1 cherry"},
+
+  // --- Flavored Ice Cream Priced Shakes/Malts --- (explicit: "cone size scoops")
+  {cat:"Shakes & Malts", fullRecipe:true, q:"FULL RECIPE — Flavored Ice Cream shake — everything, all sizes?", a:"Cone-size scoops of ice cream:\nSmall: 1½ | Medium: 2 | Large: 3\n\nCut back on flavoring, all sizes. Offer vanilla plus another flavoring.\n\nFill with MM (Malt Mix) — never with more flavored ice cream, even mid-mix if you need to add more."},
+  {cat:"Shakes & Malts", sizeOnly:true, q:"Flavored ice cream shake, SMALL — how many cone-size scoops of ice cream?", a:"1½ cone-size scoops"},
+  {cat:"Shakes & Malts", sizeOnly:true, q:"Flavored ice cream shake, MEDIUM — how many cone-size scoops of ice cream?", a:"2 cone-size scoops"},
+  {cat:"Shakes & Malts", sizeOnly:true, q:"Flavored ice cream shake, LARGE — how many cone-size scoops of ice cream?", a:"3 cone-size scoops"},
+  {cat:"Shakes & Malts", sizeOnly:true, q:"Flavored ice cream shake — what do you do with the flavoring liquid, any size?", a:"Cut back on flavoring"},
+  {cat:"Shakes & Malts", sizeOnly:true, q:"Flavored ice cream shake — what do you fill with, any size?", a:"Fill with MM (Malt Mix) — not more flavored ice cream"},
+  {cat:"Shakes & Malts", q:"Flavored ice cream shake — what do you offer the customer in addition to their chosen flavor?", a:"Vanilla, plus another flavoring"},
+  {cat:"Shakes & Malts", q:"While mixing a flavored ice cream shake, if you need to add more, what do you add — more flavored ice cream or more MM?", a:"More MM (Malt Mix) — not more flavored ice cream"},
+
+  // Sundaes
+
+  {cat:"Sundaes", q:"What does UOJ mean and which sundae flavors use it?", a:"Use Own Judgment. Applies to Chocolate, Butterscotch, and Marshmallow sundae toppings."},
+  {cat:"Sundaes", q:"Fruit sundae topping amounts (Strawberry, Pineapple, Peach, Red Raspberry) for 1 / 2 / 3 dip?", a:"1½ / 2 / 3 — and use plenty of fruit."},
+  {cat:"Sundaes", q:"Hot Fudge sundae amounts for 1 / 2 / 3 dip?", a:"3 / 5 / 7."},
+  {cat:"Sundaes", q:"What cup does each sundae size go in?", a:"1 Dip → one dip cup.\n2 Dip → two dip cup.\n3 Dip → large shake cup or boat."},
+  {cat:"Sundaes", q:"What ice cream flavor do you default to for a sundae if the customer doesn't specify?", a:"Vanilla — and there's no additional charge for using a different flavor instead."},
+  {cat:"Sundaes", q:"True or false: sundaes only need to be weighed if they're large.", a:"False — ALL sundaes must be weighed, regardless of size."},
+  {cat:"Sundaes", q:"Turtle special sundae — what three components and roughly what ratio (1 Dip)?", a:"Butterscotch (¾), Hot Fudge (2), Pecans (3 spoons)."},
+  {cat:"Sundaes", q:"S'mores special sundae — what ice cream base and what three toppings (1 Dip)?", a:"Graham ice cream base. Marshmallow (1), Hot Fudge (2), Chocolate Chips (1 scoop)."},
+  {cat:"Sundaes", q:"Cherry Bon Bon sundae — what two toppings, 1 Dip amounts?", a:"Hot Fudge (2), Black Cherry (1)."},
+  {cat:"Sundaes", q:"Dusty Road sundae — what two toppings?", a:"Chocolate (UOJ) and Malt Powder (1 heaping spoon for 1 Dip, 1½ heaping spoons for 2 Dip)."},
+  {cat:"Sundaes", q:"Brownie Under — what's the layering process for a 2 Dip in a boat vs a large cup?", a:"Boat: cut brownie in half, put a scoop of ice cream on each half, then toppings.\nLarge cup: layer brownie, ice cream, fudge — repeat — then add nuts, whip, cherry."},
+  {cat:"Sundaes", q:"Special Sundae cup sizes — 1 Dip and 2 Dip default to what cups?", a:"1 Dip → 8oz sundae cup.\n2 Dip → 16oz sundae cup (unless otherwise noted)."},
+
+  // Ice Cream Sodas
+  {cat:"Ice Cream Sodas", q:"What cup size does a 1 Dip soda go in vs a 2-3 Dip soda?", a:"1 Dip → medium cup.\n2 & 3 Dip → large cup."},
+  {cat:"Ice Cream Sodas", q:"What's the 4-step build order for an ice cream soda?", a:"1) Add ingredients per the table.\n2) Stir with a metal spoon.\n3) Add vanilla ice cream over the sink.\n4) Top off with carbonated water."},
+  {cat:"Ice Cream Sodas", q:"Soda flavoring amounts for flavors ending in -BERRY or -APPLE (1/2/3 dip)?", a:"4 / 5 / 5."},
+  {cat:"Ice Cream Sodas", q:"Soda flavoring amounts for all other flavorings (1/2/3 dip)?", a:"2 / 3 / 3."},
+  {cat:"Ice Cream Sodas", q:"How much Half and Half goes in a soda, regardless of size?", a:"2 Tbsp — same for 1, 2, and 3 dip."},
+  {cat:"Ice Cream Sodas", q:"What's the carbonated water fill line for a soda?", a:"1 & 2 Dip: top of the \"i\" in the Whitey's logo.\n3 Dip: top of the \"Ice Cream\" wording."},
+  {cat:"Ice Cream Sodas", q:"A customer wants a small soda served in a large cup. What's the procedure?", a:"Use the large soda recipe/procedure, but only one scoop of ice cream. Charge the customer for a 1 dip soda, then press the \"small soda in large cup\" button."},
+
+  // Banana Splits
+  {cat:"Banana Splits", q:"What's the one non-negotiable rule about banana placement in a banana split?", a:"The banana must always be added before toppings — no exceptions."},
+  {cat:"Banana Splits", q:"1 Dip Banana Split — ice cream, banana, and cup?", a:"6oz dip of Vanilla, half a medium banana, served in a 16oz sundae cup w/out lid or medium malt cup with lid."},
+  {cat:"Banana Splits", q:"2 Dip Banana Split — ice cream, banana, and toppings?", a:"4oz Vanilla + 4oz Strawberry, whole banana, 1 scoop Pineapple topping + 1 scoop Strawberry topping."},
+  {cat:"Banana Splits", q:"3 Dip (traditional) Banana Split — what's added beyond the 2 Dip version?", a:"A 4oz Chocolate dip and ½ pump Chocolate topping, alongside the vanilla and strawberry."},
+  {cat:"Banana Splits", q:"For a Banana Split served as a Boat instead of a cup, what changes?", a:"Toppings and amounts stay the same — you just cut the banana lengthwise instead of slicing it thin, and match each fruit topping to its corresponding ice cream flavor dip."},
+  {cat:"Banana Splits", q:"What are the standard \"extra toppings\" on every banana split, top to bottom?", a:"Cherry, 1 spoon mixed nuts, whipped cream, 2 spoons mixed nuts."},
+  {cat:"Banana Splits", q:"Hot Fudge Banana Splits — what flavor is typically used and can it change?", a:"Vanilla is typical, but the customer can request any flavor. Use the same Hot Fudge topping amounts as sundaes (3, 5, 7)."},
+
+  // Special Sundaes / Bostons
+  {cat:"Bostons", q:"What size are Bostons served in?", a:"Large only."},
+  {cat:"Bostons", q:"What are the 5 Rules for Bostons?", a:"1) Large only\n2) Use recipe for large shake\n3) Fill to apostrophe\n4) 4oz dip\n5) 1 scoop/pump topping (2 for Hot Fudge)"},
+  {cat:"Bostons", q:"If the shake portion of a Boston uses a flavored ice cream, what extra register step do you take?", a:"Press the \"Ice Cream Boston\" button IN ADDITION TO one of the three Boston register buttons."},
+  {cat:"Bostons", q:"What's the difference between a Regular Boston, Hot Fudge Boston, and Double Fudge Boston?", a:"Regular: reg-priced shake + reg-priced sundae (not HF).\nHot Fudge: reg-priced shake + HF-priced sundae, OR HF-priced shake + reg-priced sundae.\nDouble Fudge: HF-priced shake + HF-priced sundae."},
+
+  // Freezes & Floats
+  {cat:"Freezes & Floats", q:"What size do Regular Freezes come in, and what size do Sherbet Freezes come in?", a:"Regular Freezes: large only.\nSherbet Freezes: all 3 sizes."},
+  {cat:"Freezes & Floats", q:"What are the 4 steps for making a Regular Freeze?", a:"1) Use the dip and flavoring amounts with a touch of carbonated water.\n2) Mix thoroughly and spin off on low speed.\n3) Fill with more carbonated water, mix again, spin off on low speed.\n4) Serve with a spoon and 2 straws."},
+  {cat:"Freezes & Floats", q:"Regular Freeze (Large) — how many dips and how much flavoring?", a:"2 large dips and 4 (flavoring/MM)."},
+  {cat:"Freezes & Floats", q:"What's the difference in build between a Pop Float and a Slush Float?", a:"Pop Float: fill cup with pop, carefully add ice cream over the sink, top off with more pop.\nSlush Float: fill ¼–½ with slush, add vanilla ice cream, top with more slush around the edges."},
+  {cat:"Freezes & Floats", q:"How do you build a Flavored Pop (like a Cherry or Vanilla Coke)?", a:"Add ¼\" flavoring to the cup (a little less for small), fill cup half full of ice, add pop almost to the top, stir well with a metal spoon."},
+
+  // Cones & Packages
+  {cat:"Cones & Packages", q:"What are the cone/single-serving weights: Mini, One Dip, Two Dip, Three Dip, Flavor Flight?", a:"Mini: 2oz.\nOne Dip: 4-5oz.\nTwo Dip: 8oz.\nThree Dip: 12oz.\nFlavor Flight: four 2oz dips."},
+  {cat:"Cones & Packages", q:"What is a Pup Cup?", a:"A mini dip of vanilla with a dog bone on top, served in a mini dip cup."},
+  {cat:"Cones & Packages", q:"What is a Flavor Flight and what cup does it go in?", a:"4 mini scoops served in a banana boat."},
+  {cat:"Cones & Packages", q:"Which package sizes are available hand-packed vs prepackaged only?", a:"Pints (16oz) and Quarts (32oz): available prepackaged or hand-packed.\n1.5 Quarts and 4 Qt (1 gallon) pails: prepackaged only."},
+  {cat:"Cones & Packages", q:"Is the waffle cone or waffle bowl included in the base price?", a:"No — the waffle cone and waffle bowl button is an additional charge."},
+
+  // ---- SIZES ONLY: terse number-recall cards, no prose ----
+
+  // Sundaes
+  {cat:"Sundaes", sizeOnly:true, q:"Fruit sundae topping (Strawberry/Pineapple/Peach/Red Raspberry) — 1/2/3 Dip", a:"1½ / 2 / 3"},
+  {cat:"Sundaes", sizeOnly:true, q:"Hot Fudge sundae — 1/2/3 Dip", a:"3 / 5 / 7"},
+  {cat:"Sundaes", sizeOnly:true, q:"Sundae dip weight — 1 Dip", a:"6 oz."},
+  {cat:"Sundaes", sizeOnly:true, q:"Sundae dip weight — 2 Dip", a:"2–4 oz. each"},
+  {cat:"Sundaes", sizeOnly:true, q:"Sundae dip weight — 3 Dip", a:"3–4 oz. each"},
+  {cat:"Sundaes", sizeOnly:true, q:"Turtle sundae (1 Dip) — Butterscotch / Hot Fudge / Pecans", a:"¾ / 2 / 3 spoons"},
+  {cat:"Sundaes", sizeOnly:true, q:"Turtle sundae (2 Dip) — Butterscotch / Hot Fudge / Pecans", a:"1 / 3 / 4 spoons"},
+  {cat:"Sundaes", sizeOnly:true, q:"S'mores sundae (1 Dip) — Marshmallow / Hot Fudge / Choc Chips", a:"1 / 2 / 1 scoop"},
+  {cat:"Sundaes", sizeOnly:true, q:"S'mores sundae (2 Dip) — Marshmallow / Hot Fudge / Choc Chips", a:"2 / 3 / 2 scoops"},
+  {cat:"Sundaes", sizeOnly:true, q:"Cherry Bon Bon sundae (1 Dip) — Hot Fudge / Black Cherry", a:"2 / 1"},
+  {cat:"Sundaes", sizeOnly:true, q:"Cherry Bon Bon sundae (2 Dip) — Hot Fudge / Black Cherry", a:"3 / 1½"},
+  {cat:"Sundaes", sizeOnly:true, q:"Dusty Road sundae (1 Dip) — Malt Powder", a:"1 heaping spoon"},
+  {cat:"Sundaes", sizeOnly:true, q:"Dusty Road sundae (2 Dip) — Malt Powder", a:"1½ heaping spoons"},
+  {cat:"Sundaes", sizeOnly:true, q:"Brownie Under (1/2 Dip) — HF amount", a:"2 / 3"},
+  {cat:"Sundaes", sizeOnly:true, q:"Special sundae cup — 1 Dip / 2 Dip", a:"8 oz. / 16 oz."},
+
+  // Ice Cream Sodas
+  {cat:"Ice Cream Sodas", sizeOnly:true, q:"Soda flavoring, -BERRY/-APPLE — 1/2/3 Dip", a:"4 / 5 / 5"},
+  {cat:"Ice Cream Sodas", sizeOnly:true, q:"Soda flavoring, all other flavors — 1/2/3 Dip", a:"2 / 3 / 3"},
+  {cat:"Ice Cream Sodas", sizeOnly:true, q:"Soda Half and Half — any size", a:"2 Tbsp."},
+  {cat:"Ice Cream Sodas", sizeOnly:true, q:"Soda dip size — 1 Dip", a:"6 oz."},
+  {cat:"Ice Cream Sodas", sizeOnly:true, q:"Soda dip size — 2 Dip", a:"two 4 oz."},
+  {cat:"Ice Cream Sodas", sizeOnly:true, q:"Soda dip size — 3 Dip", a:"three 4 oz."},
+
+  // Banana Splits
+  {cat:"Banana Splits", sizeOnly:true, q:"1 Dip Banana Split — ice cream amount", a:"6 oz. Vanilla"},
+  {cat:"Banana Splits", sizeOnly:true, q:"1 Dip Banana Split — banana amount", a:"Half a medium banana"},
+  {cat:"Banana Splits", sizeOnly:true, q:"2 Dip Banana Split — ice cream amounts", a:"4 oz. Vanilla + 4 oz. Strawberry"},
+  {cat:"Banana Splits", sizeOnly:true, q:"3 Dip Banana Split (traditional) — ice cream amounts", a:"4 oz. Vanilla + 4 oz. Chocolate + 4 oz. Strawberry"},
+  {cat:"Banana Splits", sizeOnly:true, q:"3 Dip Banana Split — topping amounts", a:"1 scoop Pineapple, ½ pump Chocolate, 1 scoop Strawberry"},
+  {cat:"Banana Splits", sizeOnly:true, q:"Banana split extra toppings — nuts amounts", a:"2 spoons + 1 spoon"},
+
+  // Freezes & Floats
+  {cat:"Freezes & Floats", sizeOnly:true, q:"Regular Freeze (L) — dips / flavoring", a:"2 large dips / 4"},
+  {cat:"Freezes & Floats", sizeOnly:true, q:"Sherbet Freeze — dips, S/M/L", a:"2 / 3 / 4"},
+  {cat:"Freezes & Floats", sizeOnly:true, q:"Sherbet Freeze — cut back flavoring, S/M/L", a:"1 / 1.5 / 2"},
+
+  // Cones & Packages
+  {cat:"Cones & Packages", sizeOnly:true, q:"Cone weight — Mini Dip", a:"2 oz."},
+  {cat:"Cones & Packages", sizeOnly:true, q:"Cone weight — One Dip", a:"4–5 oz."},
+  {cat:"Cones & Packages", sizeOnly:true, q:"Cone weight — Two Dip", a:"8 oz."},
+  {cat:"Cones & Packages", sizeOnly:true, q:"Cone weight — Three Dip", a:"12 oz."},
+  {cat:"Cones & Packages", sizeOnly:true, q:"Flavor Flight — scoop count/size", a:"Four 2 oz. dips"},
+
+  // Bostons
+  {cat:"Bostons", sizeOnly:true, q:"Boston topping dip size", a:"4 oz."},
+  {cat:"Bostons", sizeOnly:true, q:"Boston topping — scoop/pump count (regular)", a:"1 scoop/pump"},
+  {cat:"Bostons", sizeOnly:true, q:"Boston topping — scoop/pump count (Hot Fudge)", a:"2 Hot Fudge"},
+
+  // ============================================================
+  // ICE CREAM FLAVORS — descriptions (flavor name -> what's in it)
+  // ============================================================
+  {cat:"Ice Cream Flavors", q:"Banana Graham — what's in it?", a:"Fresh banana ice cream with a graham cracker revel"},
+  {cat:"Ice Cream Flavors", q:"Black Cherry — what's in it?", a:"Black cherry flavored ice cream with black cherries mixed throughout"},
+  {cat:"Ice Cream Flavors", q:"Black Raspberry Chip — what's in it?", a:"Black raspberry flavored ice cream with a hard chocolate swirl"},
+  {cat:"Ice Cream Flavors", q:"Black Walnut — what's in it, and what's the availability restriction?", a:"Black walnut flavored ice cream mixed with black walnut pieces. Prepackaged pints only."},
+  {cat:"Ice Cream Flavors", q:"Blue Moon (aka Smurf) — what's in it?", a:"Blue colored, citrus flavored ice cream mixed with miniature marshmallows"},
+  {cat:"Ice Cream Flavors", q:"Bubble Gum — what's in it?", a:"Bubble gum flavored ice cream mixed with pieces of real gum"},
+  {cat:"Ice Cream Flavors", q:"Butter Pecan — what's in it?", a:"Butter flavored ice cream with butter-roasted pecans mixed throughout"},
+  {cat:"Ice Cream Flavors", q:"Chocolate — what's in it?", a:"Whitey's own rich Dutch chocolate ice cream"},
+  {cat:"Ice Cream Flavors", q:"Chocolate Chip — what's in it?", a:"Vanilla ice cream loaded with two different kinds of chocolate chips"},
+  {cat:"Ice Cream Flavors", popular:true, q:"Chocolate Chip Cookie Dough (flavor) — what's in it?", a:"Brown sugar flavored ice cream mixed with chocolate chips and real cookie dough pieces"},
+  {cat:"Ice Cream Flavors", popular:true, q:"Chocolate Fudge Brownie — what's in it?", a:"Dark chocolate flavored ice cream matched with fudge swirls and brownie bits mixed in"},
+  {cat:"Ice Cream Flavors", q:"Chocolate Peanut Butter Revel — what's in it?", a:"Chocolate flavored ice cream with peanut butter swirled throughout"},
+  {cat:"Ice Cream Flavors", q:"Coconut Joy — what's in it?", a:"Coconut ice cream mixed with chocolate-covered almonds"},
+  {cat:"Ice Cream Flavors", q:"Cookies Galore — what's in it?", a:"A rich vanilla flavored ice cream loaded with chunks of cookie dough pieces and OREO® cookies"},
+  {cat:"Ice Cream Flavors", popular:true, q:"Cotton Candy — what's in it?", a:"Pink and blue colored ice cream with cotton candy flavoring"},
+  {cat:"Ice Cream Flavors", q:"Cup O' Joe Espresso — what's in it?", a:"KONA® coffee flavored ice cream with a ribbon of espresso fudge and chocolate espresso chips"},
+  {cat:"Ice Cream Flavors", q:"Dairy-Free Chocolate Mint — what's it made with?", a:"A mixture of coconut cream and cocoa with the perfect blend of mint — rich and creamy"},
+  {cat:"Ice Cream Flavors", q:"Dairy-Free Fruit Delight — what's it made with?", a:"A mixture of coconut cream, strawberries, and pineapple — rich and creamy"},
+  {cat:"Ice Cream Flavors", q:"French Vanilla — what's in it, and what's the availability restriction?", a:"Vanilla ice cream with egg yolks added for a richer flavor. Pints and 1.5 qts only."},
+  {cat:"Ice Cream Flavors", q:"Graham Central Station — what's in it?", a:"Graham cracker flavored ice cream with a crunchy graham cracker swirled throughout"},
+  {cat:"Ice Cream Flavors", q:"Gummy Bear® — what's in it?", a:"Light raspberry flavored ice cream loaded with Gummy Bears"},
+  {cat:"Ice Cream Flavors", popular:true, q:"Mint Chocolate Chip — what's in it?", a:"Green, mint flavored ice cream with two kinds of chocolate chips mixed throughout"},
+  {cat:"Ice Cream Flavors", q:"Mint Cookie Crunch — what's in it?", a:"Mint ice cream mixed with a minty chocolate cookie revel and packed with chunks of OREO®"},
+  {cat:"Ice Cream Flavors", q:"Mississippi Mud Revel — what's in it?", a:"KONA® coffee flavored ice cream matched with fudge swirls and mixed with OREO® cookie bits"},
+  {cat:"Ice Cream Flavors", popular:true, q:"Moose Tracks® — what's in it?", a:"Vanilla ice cream with heavy fudge swirled throughout, mixed with chocolate covered peanut butter cups"},
+  {cat:"Ice Cream Flavors", q:"Monster Cookie — what's in it?", a:"Peanut butter ice cream with a peanut butter oatmeal cookie, chocolate chips, and mini M&M's"},
+  {cat:"Ice Cream Flavors", q:"Orange Sherbet — what's in it?", a:"Orange flavored sherbet"},
+  {cat:"Ice Cream Flavors", q:"Peanut Butter Oreo Fudge — what's in it?", a:"Peanut Butter ice cream with fudge swirls and Oreo chunks"},
+  {cat:"Ice Cream Flavors", q:"Peanut Butter Pretzel Bark — what's in it?", a:"Vanilla ice cream with a peanut butter cookie revel and pieces of chocolate covered pretzel bark"},
+  {cat:"Ice Cream Flavors", q:"Praline Pecan — what's in it, and what's the availability restriction?", a:"Light, butter pecan flavored ice cream with swirls of caramel, pecans, and praline pecans (candy-coated pecans). Prepackaged in 1.5 qt and pints only."},
+  {cat:"Ice Cream Flavors", q:"Salted Caramel — what's in it?", a:"Lightly salted caramel ice cream with a caramel ribbon"},
+  {cat:"Ice Cream Flavors", q:"Sgt. Camo® — what's in it, and what does it taste like?", a:"Camouflage colored ice cream made from graham cracker and marshmallow ice cream with a ribbon of Whitey's famous fudge. Tastes like s'mores."},
+  {cat:"Ice Cream Flavors", popular:true, q:"Strawberry — what's in it?", a:"Fresh strawberries swirled in a strawberry flavored ice cream"},
+  {cat:"Ice Cream Flavors", popular:true, q:"Strawberry Cheesecake — what's in it?", a:"Cream cheese flavored ice cream with strawberries swirled throughout and mixed with candy-coated graham cracker bits"},
+  {cat:"Ice Cream Flavors", q:"Swiss Almond Chocolate — what's in it?", a:"Chocolate flavored ice cream with chocolate-covered almonds"},
+  {cat:"Ice Cream Flavors", popular:true, q:"Vanilla — what makes Whitey's vanilla distinct?", a:"Made with Whitey's exclusive pure Madagascar vanilla bean flavoring"},
+  {cat:"Ice Cream Flavors", q:"Watermelon Sherbet — what's in it?", a:"Watermelon flavored sherbet"},
+  {cat:"Ice Cream Flavors", q:"White Chocolate Raspberry — what's in it?", a:"White chocolate flavored ice cream with red raspberry swirled throughout and mixed with dark chocolate chips"},
+  {cat:"Ice Cream Flavors", q:"White Tiger Paws — what's in it?", a:"Vanilla flavored ice cream mixed with fudge swirls and chunks of OREO® cookies"},
+
+  // Reverse-direction cards: ingredient/description -> flavor name (harder recall direction)
+  {cat:"Ice Cream Flavors", q:"Which flavor has real pieces of gum mixed in?", a:"Bubble Gum"},
+  {cat:"Ice Cream Flavors", q:"Which flavor is vanilla ice cream with fudge swirls and chocolate covered peanut butter cups?", a:"Moose Tracks®"},
+  {cat:"Ice Cream Flavors", q:"Which flavor is pink and blue colored?", a:"Cotton Candy"},
+  {cat:"Ice Cream Flavors", q:"Which flavor is blue colored and citrus flavored with miniature marshmallows?", a:"Blue Moon (aka Smurf)"},
+  {cat:"Ice Cream Flavors", q:"Which two flavors are KONA® coffee based?", a:"Cup O' Joe Espresso and Mississippi Mud Revel"},
+  {cat:"Ice Cream Flavors", q:"Which flavor tastes like s'mores?", a:"Sgt. Camo®"},
+  {cat:"Ice Cream Flavors", q:"Which flavor has mini M&M's in it?", a:"Monster Cookie"},
+  {cat:"Ice Cream Flavors", q:"Name both dairy-free flavors.", a:"Dairy-Free Chocolate Mint and Dairy-Free Fruit Delight"},
+  {cat:"Ice Cream Flavors", q:"Which flavors are restricted to prepackaged/specific sizes only?", a:"Black Walnut (prepackaged pints only), French Vanilla (pints and 1.5 qts only), Praline Pecan (prepackaged 1.5 qt and pints only)"},
+  {cat:"Ice Cream Flavors", q:"Which flavor uses egg yolks for a richer taste?", a:"French Vanilla"}
+];
+
+// Spaced-repetition state, persisted via localStorage (see saveProgressToStorage/loadStoredProgress)
+// Leitner-style boxes with real calendar due dates — a well-established spaced-repetition
+// scheme (same family as Anki/SuperMemo): each successful review pushes the next review
+// further out; a miss resets it to the front of the line.
+const BOX_INTERVAL_DAYS = [0, 1, 3, 7, 14, 30]; // box index -> days until next due
+const cardState = deck.map(()=>({box:0, dueDate:null, lastRating:null})); // dueDate null = due now
+let currentIndices = [];
+let currentPos = 0;
+
+function todayStr(){
+  const d = new Date();
+  d.setHours(0,0,0,0);
+  return d.toISOString().slice(0,10);
+}
+function addDays(dateStr, days){
+  const d = new Date(dateStr + 'T00:00:00');
+  d.setDate(d.getDate() + days);
+  return d.toISOString().slice(0,10);
+}
+function isCardDue(i){
+  const dd = cardState[i].dueDate;
+  return !dd || dd <= todayStr();
+}
+function applyRating(idx, rating){
+  const s = cardState[idx];
+  s.lastRating = rating;
+  if(rating==='again'){
+    s.box = 0;
+    s.dueDate = todayStr(); // due again today — and also recycled within this session, see below
+  } else if(rating==='hard'){
+    s.box = Math.max(0, s.box); // doesn't graduate
+    s.dueDate = addDays(todayStr(), 1);
+  } else if(rating==='good'){
+    s.box = Math.min(s.box+1, BOX_INTERVAL_DAYS.length-1);
+    s.dueDate = addDays(todayStr(), BOX_INTERVAL_DAYS[s.box]);
+  } else if(rating==='easy'){
+    s.box = Math.min(s.box+2, BOX_INTERVAL_DAYS.length-1);
+    s.dueDate = addDays(todayStr(), BOX_INTERVAL_DAYS[s.box]);
+  }
+}
+
+// ---------- 7-DAY SHAKES & MALTS PLAN ----------
+const WEEK_STORAGE_KEY = 'whiteys-shakes-week-plan-v1';
+const shakesIndices = deck.map((c,i)=>i).filter(i=>deck[i].cat==="Shakes & Malts");
+const WEEK_DAYS = 7;
+// Assign each Shakes & Malts card to a day (1-7) by even split, in deck order
+const cardDayAssignment = {}; // index -> day number
+(function assignDays(){
+  const perDay = Math.ceil(shakesIndices.length / WEEK_DAYS);
+  shakesIndices.forEach((idx,pos)=>{
+    cardDayAssignment[idx] = Math.min(WEEK_DAYS, Math.floor(pos / perDay) + 1);
+  });
+})();
+
+function loadWeekPlan(){
+  try{
+    const raw = localStorage.getItem(WEEK_STORAGE_KEY);
+    return raw ? JSON.parse(raw) : null;
+  }catch(e){ return null; }
+}
+function saveWeekPlan(plan){
+  try{ localStorage.setItem(WEEK_STORAGE_KEY, JSON.stringify(plan)); }catch(e){}
+}
+function currentDayNumber(plan){
+  if(!plan || !plan.startDate) return null;
+  const start = new Date(plan.startDate + 'T00:00:00');
+  const today = new Date();
+  today.setHours(0,0,0,0);
+  const diffDays = Math.floor((today - start) / 86400000);
+  return Math.min(WEEK_DAYS, Math.max(1, diffDays + 1));
+}
+
+function renderWeekPlanUI(){
+  const plan = loadWeekPlan();
+  const setupEl = document.getElementById('week-setup');
+  const activeEl = document.getElementById('week-active');
+  if(!plan){
+    setupEl.style.display = 'block';
+    activeEl.style.display = 'none';
+    populateDayPicker(null);
+    return;
+  }
+  setupEl.style.display = 'none';
+  activeEl.style.display = 'block';
+  const dayNum = currentDayNumber(plan);
+  const gridEl = document.getElementById('week-day-grid');
+  gridEl.innerHTML = '';
+  for(let d=1; d<=WEEK_DAYS; d++){
+    const pill = document.createElement('div');
+    const isPast = d < dayNum;
+    const isToday = d === dayNum;
+    pill.textContent = 'Day ' + d;
+    pill.style.cssText = `padding:6px 12px; border-radius:999px; font-size:0.8rem; border:1.5px solid ${isToday?'var(--strawberry)':'var(--line)'}; background:${isToday?'var(--strawberry)':'var(--paper)'}; color:${isToday?'#fff':'var(--choc)'}; opacity:${isPast||isToday?1:0.75};`;
+    gridEl.appendChild(pill);
+  }
+  const cardsToday = shakesIndices.filter(i=>cardDayAssignment[i]===dayNum).length;
+  document.getElementById('week-status-text').textContent =
+    `Today is Day ${dayNum} of ${WEEK_DAYS} — ${cardsToday} new cards scheduled for today. Use the day picker below to study any day, on-schedule or ahead.`;
+  populateDayPicker(dayNum);
+}
+
+// Fills the day-picker dropdown with only unlocked days (1..dayNum), defaulting to today's day.
+function populateDayPicker(dayNum){
+  const picker = document.getElementById('week-day-picker');
+  const prevValue = picker.value;
+  picker.innerHTML = '';
+  if(!dayNum){
+    picker.disabled = true;
+    return;
+  }
+  picker.disabled = false;
+  for(let d=1; d<=WEEK_DAYS; d++){
+    const opt = document.createElement('option');
+    opt.value = d;
+    const count = shakesIndices.filter(i=>cardDayAssignment[i]===d).length;
+    const isToday = d===dayNum;
+    const isFuture = d > dayNum;
+    opt.textContent = isToday ? `Day ${d} (today) — ${count} cards`
+      : isFuture ? `Day ${d} (ahead of schedule) — ${count} cards`
+      : `Day ${d} — ${count} cards`;
+    picker.appendChild(opt);
+  }
+  // keep previous selection if still valid, else default to today
+  if(prevValue){
+    picker.value = prevValue;
+  } else {
+    picker.value = String(dayNum);
+  }
+}
+
+document.getElementById('week-start-btn').addEventListener('click', ()=>{
+  const val = document.getElementById('week-start-input').value;
+  if(!val){ showToast('Pick a start date first'); return; }
+  saveWeekPlan({startDate: val});
+  renderWeekPlanUI();
+  showToast('Week started');
+});
+document.getElementById('week-reset-btn').addEventListener('click', ()=>{
+  localStorage.removeItem(WEEK_STORAGE_KEY);
+  renderWeekPlanUI();
+  showToast('Week reset');
+});
+
+const catFilter = document.getElementById('deck-filter');
+const modeFilter = document.getElementById('deck-mode');
+const sizesOnlyToggle = document.getElementById('sizes-only-toggle');
+const weekModeToggle = document.getElementById('week-mode-toggle');
+const weekDayPicker = document.getElementById('week-day-picker');
+const popularOnlyToggle = document.getElementById('popular-only-toggle');
+const popularNoteEl = document.getElementById('popular-note');
+weekModeToggle.addEventListener('change', ()=>{
+  weekDayPicker.style.display = weekModeToggle.checked ? 'inline-block' : 'none';
+});
+popularOnlyToggle.addEventListener('change', ()=>{
+  popularNoteEl.style.display = popularOnlyToggle.checked ? 'block' : 'none';
+});
+const flashcardEl = document.getElementById('flashcard');
+const qtextEl = document.getElementById('qtext');
+const atextEl = document.getElementById('atext');
+const catFrontEl = document.getElementById('cat-front');
+const catBackEl = document.getElementById('cat-back');
+const deckStatsEl = document.getElementById('deck-stats');
+const flashActiveEl = document.getElementById('flash-active');
+const flashEmptyEl = document.getElementById('flash-empty');
+
+// ---------- SESSION ENGINE ----------
+// Two-phase drilling, which is the same "learning steps" idea Anki uses and is grounded in
+// the testing-effect / desirable-difficulty research on spaced retrieval practice:
+//   Phase 1 ("first pass"): every eligible card, once, in random order.
+//   Phase 2 ("reviewing missed cards"): only the cards you rated Again/Hard during this
+//   session, recycled in their own round(s) until each one is finally rated Good/Easy —
+//   so a wrong answer keeps resurfacing on its own, without ever being confused with a
+//   fresh card's content.
+let sessionPhase = 'main'; // 'main' | 'relearn' | 'done'
+let roundNumber = 1;
+let relearnPool = [];
+let hadCardsAtStart = false;
+let isTransitioning = false; // true while the flip-back animation is still playing
+const FLIP_MS = 500; // must match the .flashcard CSS transition duration
+
+function shuffleInPlace(arr){
+  for(let i=arr.length-1;i>0;i--){
+    const j = Math.floor(Math.random()*(i+1));
+    [arr[i],arr[j]]=[arr[j],arr[i]];
+  }
+  return arr;
+}
+
+function eligiblePool(){
+  const cat = catFilter.value;
+  const mode = modeFilter.value;
+  const sizesOnly = sizesOnlyToggle.checked;
+  const weekMode = weekModeToggle.checked;
+  const popularOnly = popularOnlyToggle.checked;
+  let indices = deck.map((_,i)=>i).filter(i=> cat==='all' || deck[i].cat===cat);
+  if(sizesOnly){
+    indices = indices.filter(i=>deck[i].sizeOnly===true);
+  }
+  if(popularOnly){
+    indices = indices.filter(i=>deck[i].popular===true);
+  }
+  if(weekMode){
+    const plan = loadWeekPlan();
+    const dayNum = plan ? currentDayNumber(plan) : null;
+    const selectedDay = weekDayPicker.value ? Number(weekDayPicker.value) : dayNum;
+    if(dayNum && selectedDay){
+      indices = indices.filter(i=> deck[i].cat==="Shakes & Malts" && cardDayAssignment[i] === selectedDay);
+    } else {
+      indices = [];
+    }
+  }
+  if(mode==='due'){
+    indices = indices.filter(i=>isCardDue(i));
+  } else if(mode==='missed'){
+    indices = indices.filter(i=>cardState[i].lastRating==='again' || cardState[i].lastRating==='hard');
+  }
+  return indices;
+}
+
+function buildQueue(){
+  const indices = eligiblePool();
+  currentIndices = shuffleInPlace(indices.slice());
+  currentPos = 0;
+  relearnPool = [];
+  roundNumber = 1;
+  hadCardsAtStart = currentIndices.length > 0;
+  sessionPhase = hadCardsAtStart ? 'main' : 'done';
+  paint();
+}
+
+// Repaints the card, but if the card is currently showing its answer (flipped), it waits
+// for the flip-back animation to finish before swapping the text underneath — otherwise
+// you catch a glimpse of the next card's answer mid-spin.
+function safeRepaint(){
+  if(flashcardEl.classList.contains('flipped')){
+    flashcardEl.classList.remove('flipped');
+    isTransitioning = true;
+    setTimeout(()=>{ isTransitioning = false; paint(); }, FLIP_MS);
+  } else {
+    paint();
+  }
+}
+
+function paint(){
+  updateStats();
+  if(sessionPhase==='done' || currentIndices.length===0){
+    flashActiveEl.style.display='none';
+    flashEmptyEl.style.display='block';
+    flashEmptyEl.innerHTML = hadCardsAtStart
+      ? "Nice work — you've been through every card in this batch, and everything is now rated Good or Easy.<br>Come back once more are due, or switch to \"Every card\" to keep drilling."
+      : "Nothing due in this deck right now — nice work.<br>Switch \"Every card\" above to keep drilling anyway.";
+    return;
+  }
+  flashActiveEl.style.display='block';
+  flashEmptyEl.style.display='none';
+  const idx = currentIndices[currentPos];
+  const card = deck[idx];
+  catFrontEl.textContent = card.cat;
+  catBackEl.textContent = card.cat;
+  qtextEl.textContent = card.q;
+  atextEl.textContent = card.a;
+}
+
+function updateStats(){
+  const total = currentIndices.length;
+  if(total===0 || sessionPhase==='done'){
+    deckStatsEl.textContent = hadCardsAtStart ? "Session complete" : "0 cards in this view";
+    return;
+  }
+  const label = sessionPhase==='relearn'
+    ? `Reviewing missed cards (round ${roundNumber})`
+    : 'First pass';
+  deckStatsEl.textContent = `${label} — card ${currentPos+1} of ${total}`;
+}
+
+flashcardEl.addEventListener('click',()=>{
+  if(isTransitioning) return;
+  flashcardEl.classList.toggle('flipped');
+});
+
+document.querySelectorAll('.rate-row button').forEach(btn=>{
+  btn.addEventListener('click',(e)=>{
+    e.stopPropagation();
+    if(isTransitioning) return;
+    if(currentIndices.length===0 || sessionPhase==='done') return;
+    const idx = currentIndices[currentPos];
+    const rating = btn.dataset.rate;
+    applyRating(idx, rating);
+    if(rating==='again' || rating==='hard'){
+      relearnPool.push(idx);
+    }
+
+    safeRepaintThenAdvance();
+
+    function safeRepaintThenAdvance(){
+      const doAdvance = ()=>{
+        currentPos++;
+        if(currentPos >= currentIndices.length){
+          if(relearnPool.length > 0){
+            currentIndices = shuffleInPlace(relearnPool.slice());
+            relearnPool = [];
+            currentPos = 0;
+            sessionPhase = 'relearn';
+            roundNumber++;
+          } else {
+            sessionPhase = 'done';
+          }
+        }
+        paint();
+        saveProgressToStorage();
+        showToast('Saved');
+      };
+      if(flashcardEl.classList.contains('flipped')){
+        flashcardEl.classList.remove('flipped');
+        isTransitioning = true;
+        setTimeout(()=>{ isTransitioning = false; doAdvance(); }, FLIP_MS);
+      } else {
+        doAdvance();
+      }
+    }
+  });
+});
+
+catFilter.addEventListener('change', buildQueue);
+modeFilter.addEventListener('change', buildQueue);
+sizesOnlyToggle.addEventListener('change', buildQueue);
+weekModeToggle.addEventListener('change', buildQueue);
+popularOnlyToggle.addEventListener('change', buildQueue);
+weekDayPicker.addEventListener('change', buildQueue);
+
+document.getElementById('reset-progress').addEventListener('click',()=>{
+  cardState.forEach(s=>{s.box=0; s.dueDate=null; s.lastRating=null;});
+  buildQueue();
+  saveProgressToStorage();
+  showToast('Progress reset');
+});
+
+// ---------- EXPORT ----------
+document.getElementById('export-btn').addEventListener('click',()=>{
+  const payload = saveProgressToStorage();
+  const blob = new Blob([JSON.stringify(payload, null, 2)], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  const stamp = payload.savedAt.replace(/[:.]/g,'-');
+  a.href = url;
+  a.download = `whiteys-progress-${stamp}.json`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  showToast('Exported');
+});
+
+// ---------- IMPORT ----------
+const importBtn = document.getElementById('import-btn');
+const importInput = document.getElementById('import-file-input');
+importBtn.addEventListener('click', ()=> importInput.click());
+importInput.addEventListener('change', (e)=>{
+  const file = e.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = (evt)=>{
+    try{
+      const payload = JSON.parse(evt.target.result);
+      const result = applyProgressPayload(payload);
+      updateProgressBanner();
+      buildQueue();
+      saveProgressToStorage();
+      showToast(`Imported ${result.matched}/${result.total} cards`);
+    }catch(err){
+      console.error(err);
+      showToast('Import failed — invalid file');
+    }
+  };
+  reader.readAsText(file);
+  importInput.value = '';
+});
+
+// ---------- INITIAL LOAD ----------
+(function initFromStorage(){
+  const stored = loadStoredProgress();
+  if(stored){
+    applyProgressPayload(stored);
+    updateProgressBanner();
+  }
+  renderWeekPlanUI();
+  buildQueue();
+})();
+</script>
+
+</body>
+</html>
