@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Whitey's Shake &amp; Malt Study Cards</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --cream:#FBF3E2; --cream2:#F3E8D2; --fudge:#3A2318; --fudge2:#5B3C2A;
+    --teal:#2C7A94; --teal-dk:#1F5C71; --raspberry:#C1443A; --paper:#FFFDF8;
+    --line: rgba(58,35,24,0.14);
+  }
+  :root:not([data-theme="light"]){}
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --cream:#211611; --cream2:#2A1D16; --fudge:#F3E8D2; --fudge2:#D8C4A8;
+      --teal:#5FB2CC; --teal-dk:#8FCBDF; --paper:#2C1F17; --line: rgba(243,232,210,0.14);
+    }
+  }
+  :root[data-theme="dark"]{
+    --cream:#211611; --cream2:#2A1D16; --fudge:#F3E8D2; --fudge2:#D8C4A8;
+    --teal:#5FB2CC; --teal-dk:#8FCBDF; --paper:#2C1F17; --line: rgba(243,232,210,0.14);
+  }
+  *{box-sizing:border-box;}
+  html{scroll-padding-top:env(safe-area-inset-top,0px);}
+  body{
+    margin:0; min-height:100%; background:var(--cream); color:var(--fudge);
+    font-family:'Inter',system-ui,-apple-system,sans-serif;
+    padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+    display:flex; flex-direction:column; align-items:center;
+  }
+  .wrap{ width:100%; max-width:640px; padding:28px 20px 40px; }
+  header{ text-align:center; margin-bottom:6px; }
+  h1{
+    font-family:'Fraunces',serif; font-weight:700; font-size:clamp(1.5rem,6vw,2.1rem);
+    margin:0 0 4px; letter-spacing:-0.01em;
+  }
+  .sub{ font-size:0.92rem; color:var(--fudge2); margin:0 0 20px; }
+  .toolbar{ display:flex; justify-content:space-between; align-items:center; gap:10px; margin-bottom:14px; }
+  .count{ font-size:0.85rem; color:var(--fudge2); font-variant-numeric:tabular-nums; }
+  .catpick{
+    font-family:inherit; font-size:0.82rem; padding:6px 10px; border-radius:8px;
+    border:1px solid var(--line); background:var(--paper); color:var(--fudge);
+  }
+  .progress{ height:4px; background:var(--line); border-radius:4px; overflow:hidden; margin-bottom:22px; }
+  .progress > div{ height:100%; background:var(--teal); transition:width .25s ease; }
+
+  .stage{ perspective:1400px; }
+  .card{
+    position:relative; width:100%; min-height:280px; border-radius:18px;
+    cursor:pointer; transform-style:preserve-3d; transition:transform .5s cubic-bezier(.2,.7,.3,1);
+  }
+  .card.flipped{ transform:rotateY(180deg); }
+  .face{
+    position:absolute; inset:0; backface-visibility:hidden; border-radius:18px;
+    background:var(--paper); border:1px solid var(--line);
+    padding:30px 26px; display:flex; flex-direction:column;
+    box-shadow:0 1px 0 var(--line), 0 14px 30px -20px rgba(58,35,24,0.35);
+  }
+  .face .body{ flex:1; display:flex; align-items:center; }
+  .tag{
+    display:inline-block; font-size:0.72rem; font-weight:600; color:var(--teal-dk);
+    background:color-mix(in srgb, var(--teal) 14%, transparent); padding:4px 10px;
+    border-radius:20px; width:fit-content; margin-bottom:14px;
+  }
+  .qtext{ font-family:'Fraunces',serif; font-weight:500; font-size:clamp(1.15rem,4.4vw,1.4rem); line-height:1.35; }
+  .atext{ font-size:1.02rem; line-height:1.55; color:var(--fudge); }
+  .frac{ display:inline-flex; flex-direction:column; align-items:center; line-height:1; vertical-align:-0.35em; margin:0 1px; font-size:0.82em; }
+  .frac .num{ border-bottom:1px solid currentColor; padding:0 2px 1px; }
+  .frac .den{ padding:1px 2px 0; }
+  .hint{ font-size:0.78rem; color:var(--fudge2); margin-top:16px; }
+  .back{ transform:rotateY(180deg); border-color:color-mix(in srgb, var(--teal) 40%, var(--line)); }
+
+  .controls{ display:flex; gap:10px; margin-top:20px; }
+  button{
+    font-family:inherit; font-size:0.9rem; font-weight:600; cursor:pointer;
+    border-radius:12px; border:1px solid var(--line); background:var(--paper); color:var(--fudge);
+    padding:12px 14px; flex:1; transition:transform .12s ease, background .15s ease;
+  }
+  button:active{ transform:scale(0.96); }
+  button.primary{ background:var(--teal); border-color:var(--teal); color:#fff; }
+  button.ghost{ flex:0 0 auto; background:transparent; }
+  .known-row{ display:flex; gap:10px; margin-top:10px; }
+  .known-row button.yes{ color:var(--teal-dk); }
+  .known-row button.no{ color:var(--raspberry); }
+  footer{ text-align:center; font-size:0.75rem; color:var(--fudge2); margin-top:28px; line-height:1.6; }
+  .done{ text-align:center; padding:40px 10px; }
+  .done h2{ font-family:'Fraunces',serif; margin-bottom:8px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Whitey's Shake &amp; Malt Cram Sheet</h1>
+    <p class="sub">Tap a card to flip it. Recipe Guide, pages 1&ndash;2.</p>
+  </header>
+
+  <div class="toolbar">
+    <span class="count" id="count">1 / 52</span>
+    <select class="catpick" id="catpick"></select>
+  </div>
+  <div class="progress"><div id="progressbar" style="width:0%"></div></div>
+
+  <div id="stageHolder"></div>
+
+  <div class="controls" id="mainControls">
+    <button class="ghost" id="shuffleBtn" title="Shuffle">Shuffle</button>
+    <button id="prevBtn">&larr; Prev</button>
+    <button class="primary" id="nextBtn">Next &rarr;</button>
+  </div>
+  <div class="known-row">
+    <button class="yes" id="knowBtn">✓ Got it</button>
+    <button class="no" id="dontBtn">↻ Review again</button>
+  </div>
+
+  <footer>
+    "Scoop" is used for any flavoring/mix-in amount the guide gave as a bare number (MM, syrups, candy, fruit) &mdash; inferred from the source guide's shorthand.<br>
+    Cards marked "Review again" get reshuffled back into your deck.
+  </footer>
+</div>
+
+<script>
+const CARDS = [
+["Basics","Shakes and malts should be made how thick?","Upside-down thick (both shakes and malts)."],
+["Basics","What's the difference between a shake and a malt?","A malt gets a heaping scoop of malt powder added, which makes it sweeter than a shake."],
+["Basics","A customer asks for a thin shake — what's the first thing you do?","Ask them how thin they'd like it."],
+["Basics","After asking how thin, what do you do to thin out a shake?","Add milk accordingly, based on their answer."],
+["Basics","What's the very first ingredient you add when starting a regular shake?","Two scoops of Malt Mix (MM)."],
+["Basics","After the Malt Mix, what goes in next?","The flavoring."],
+["Basics","For fruit-based flavors, what's the mix ratio?","Mostly juice, with some fruit."],
+["Basics","Why add the Malt Mix ASAP once you start mixing?","So you don't overmix the shake."],
+["Basics","How does building a Flavored Ice Cream shake differ from a regular shake?","You start with a set number of cone-size scoops of an ice cream flavor instead of MM — everything after that is the same process."],
+["Regular","Regular-flavor shake: scoops of flavoring for Small?","1 1/2 scoops."],
+["Regular","Regular-flavor shake: scoops of flavoring for Medium?","2 scoops."],
+["Regular","Regular-flavor shake: scoops of flavoring for Large?","3 scoops."],
+["Regular","Regular-flavor CUT BACK: scoops for Small / Medium / Large?","1 (S), 1 1/2 (M), 2 (L)."],
+["Regular","Which 18 flavors fall under \"Regular Priced Shakes/Malts\"?","Vanilla, Chocolate, Strawberry, Peach, Pineapple, Red Raspberry, Butterscotch, Black Raspberry, Blueberry, Lemon, Orange, Lime, Cherry, Root Beer, Kona Coffee, Marshmallow, Peanut Butter, Crème de Menthe (Mint)."],
+["Regular","Give the full recipe for a small Vanilla shake with a customer cut-back request.","2 scoops MM, then 1 scoop of vanilla flavoring (the Small cut-back amount)."],
+["Regular","Which price category includes Kona Coffee, Root Beer, and Marshmallow?","Regular Priced Shakes/Malts."],
+["Hot Fudge/Banana/Cake","Hot Fudge shake: scoops for Small / Medium / Large?","2 (S), 3 (M), 4 (L)."],
+["Hot Fudge/Banana/Cake","Hot Fudge CUT BACK: scoops for Small / Medium / Large?","1 1/2 (S), 2 (M), 3 (L)."],
+["Hot Fudge/Banana/Cake","Cake Batter shake: powder and liquid for Small?","3/4 scoop powder, 3/4 scoop liquid."],
+["Hot Fudge/Banana/Cake","Cake Batter shake: powder and liquid for Medium?","1 scoop powder, 1 scoop liquid."],
+["Hot Fudge/Banana/Cake","Cake Batter shake: powder and liquid for Large?","1 scoop powder, 2 scoops liquid."],
+["Hot Fudge/Banana/Cake","What do you add on top of a Cake Batter shake, if the customer wants it?","Sprinkles."],
+["Hot Fudge/Banana/Cake","Banana shake (plain): what's used for all sizes?","A dash of vanilla plus a banana — small banana for Small, medium banana for Medium and Large."],
+["Hot Fudge/Banana/Cake","Banana shake with an added flavor: what changes?","Cut back the flavoring, and use only 1/2 a banana, no matter the size."],
+["Hot Fudge/Banana/Cake","If someone adds Hot Fudge, Cake Batter, or 1/2 banana to a Special, Deluxe, or Flavored ice cream shake, what do you ring up?","Press Misc. Extras and use the $0.40 extra button."],
+["Special","Black Cherry shake: scoops for Small / Medium / Large?","1 1/2 (S), 2 (M), 3 (L)."],
+["Special","Black Cherry CUT BACK — how is it different from a normal cut back?","Don't charge for it — ring it up as \"Add Special\" instead. Amounts are still 1 (S), 1 1/2 (M), 2 (L)."],
+["Special","Give the full Black Cherry cut-back recipe someone would order.","2 scoops MM, cut back on flavoring: 1 scoop Black Cherry (S), 1 1/2 (M), or 2 (L) — rung up as \"Add Special,\" not charged extra."],
+["Special","Butterfinger/Snickers/M&M's/Heath shake: how much candy for Small / Medium / Large?","2 heaping scoops (S), 2 heaping scoops (M), 3 heaping scoops (L)."],
+["Special","For a candy mix-in shake (Butterfinger, Snickers, M&M's, Heath), what do you offer and do with the flavoring?","Offer vanilla or chocolate flavoring, and use the cut-back amount."],
+["Special","Oreo shake: how many Oreos, and where?","4 Oreos inside, 1 Oreo on top — same for every size."],
+["Special","Candy Bar shake (Reese's PB Cups, Kit Kat): how much candy per size?","One full package, for any size."],
+["Special","Chocolate Chip Cookie Dough (CCCD) shake, Small — full recipe?","1 scoop Butterscotch + 2 scoops CCCD mixed in (use the candy scoop), with a light sprinkle of CCCD on top (not a full scoop)."],
+["Special","CCCD shake, Medium — full recipe?","1 1/2 scoops Butterscotch + 2 scoops CCCD mixed in, sprinkle of CCCD on top."],
+["Special","CCCD shake, Large — full recipe?","2 scoops Butterscotch + 3 scoops CCCD mixed in, sprinkle of CCCD on top."],
+["Special","What scoop do you use specifically for CCCD?","The candy scoop."],
+["Special","How much is one \"extra\" of Butterfinger, Snickers, M&M's, Heath, CCCD, or Choc Chips?","1 heaping scoop."],
+["Special","How is an Oreo extra rung up?","Per Oreo, at the full amount; a candy bar extra is rung up as \"Add Special.\""],
+["Deluxe","Turtle Shake, Small — full recipe?","1/2 scoop Butterscotch, 1 1/2 scoops Hot Fudge, 3 pecans mixed in, 1 pecan on top."],
+["Deluxe","Turtle Shake, Medium — full recipe?","3/4 scoop Butterscotch, 2 scoops Hot Fudge, 3 pecans mixed in, 1 pecan on top."],
+["Deluxe","Turtle Shake, Large — full recipe?","1 scoop Butterscotch, 3 scoops Hot Fudge, 4 pecans mixed in, 2 pecans on top."],
+["Deluxe","Which Deluxe shake combines butterscotch, hot fudge, and pecans?","The Turtle Shake."],
+["Deluxe","How do you make a Brownie shake?","Cut the brownie into cubes, add it in at the very end of mixing so it stays chunky, and cut back on the flavoring."],
+["Deluxe","Cherry Bon Bon, Small — full recipe?","1 1/2 scoops Hot Fudge, 3/4 scoop Black Cherries."],
+["Deluxe","Cherry Bon Bon, Medium — full recipe?","2 scoops Hot Fudge, 1 scoop Black Cherries."],
+["Deluxe","Cherry Bon Bon, Large — full recipe?","3 scoops Hot Fudge, 1 1/2 scoops Black Cherries."],
+["Deluxe","What size(s) does the Banana Split Shake come in?","Large only."],
+["Deluxe","Banana Split Shake — what's mixed inside?","1 scoop Strawberry, 1 scoop Pineapple, 1 scoop Peach, and 2 spoons of Mixed Nuts, filled to the apostrophe in the Whitey's logo."],
+["Deluxe","Banana Split Shake — what goes on top?","Thinly sliced small banana (or 1/2 a large banana), whipped cream to fill the cup, one spoon of mixed nuts, and a cherry."],
+["Flavored Ice Cream","Flavored Ice Cream shake: cone-size scoops of ice cream for Small / Medium / Large?","1 1/2 (S), 2 (M), 3 (L)."],
+["Flavored Ice Cream","Flavored Ice Cream shake: what do you offer for flavoring, and what do you do with it?","Offer vanilla and another flavoring, and cut back on it — for every size."],
+["Flavored Ice Cream","While mixing a Flavored Ice Cream shake, if it needs more volume, what do you add?","More MM — never add more flavored ice cream."]
+];
+
+let deck = CARDS.map((c,i)=>i);
+let pos = 0, flipped = false, reviewQueue = [];
+
+const stageHolder = document.getElementById('stageHolder');
+const countEl = document.getElementById('count');
+const bar = document.getElementById('progressbar');
+const catpick = document.getElementById('catpick');
+
+const cats = ["All", ...Array.from(new Set(CARDS.map(c=>c[0])))];
+catpick.innerHTML = cats.map(c=>`<option value="${c}">${c}</option>`).join('');
+catpick.addEventListener('change', ()=>{
+  const c = catpick.value;
+  deck = CARDS.map((c2,i)=>i).filter(i => c==="All" || CARDS[i][0]===c);
+  pos = 0; flipped = false; reviewQueue = [];
+  render();
+});
+
+function shuffle(arr){
+  for(let i=arr.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [arr[i],arr[j]]=[arr[j],arr[i]]; }
+  return arr;
+}
+document.getElementById('shuffleBtn').addEventListener('click', ()=>{ shuffle(deck); pos=0; flipped=false; render(); });
+
+function formatFractions(text){
+  // turns "1 1/2" -> "1 <sup>1</sup>&frasl;<sub>2</sub>" style stacked fraction, and bare "3/4" too
+  return text.replace(/(\d+)\/(\d+)/g, (m,n,d)=>`<span class="frac"><span class="num">${n}</span><span class="den">${d}</span></span>`);
+}
+
+function render(){
+  if(deck.length===0){
+    stageHolder.innerHTML = `<div class="done"><h2>All caught up 🍒</h2><p>No cards in this category yet.</p></div>`;
+    document.getElementById('mainControls').style.display='none';
+    document.querySelector('.known-row').style.display='none';
+    countEl.textContent = '0 / 0'; bar.style.width='0%';
+    return;
+  }
+  document.getElementById('mainControls').style.display='flex';
+  document.querySelector('.known-row').style.display='flex';
+  const idx = deck[pos];
+  const [cat,q,a] = CARDS[idx];
+  stageHolder.innerHTML = `
+    <div class="stage">
+      <div class="card ${flipped?'flipped':''}" id="cardEl">
+        <div class="face front">
+          <span class="tag">${cat}</span>
+          <div class="body"><div class="qtext">${formatFractions(q)}</div></div>
+          <div class="hint">Tap to reveal the answer</div>
+        </div>
+        <div class="face back">
+          <span class="tag">${cat}</span>
+          <div class="body"><div class="atext">${formatFractions(a)}</div></div>
+          <div class="hint">Tap to flip back</div>
+        </div>
+      </div>
+    </div>`;
+  document.getElementById('cardEl').addEventListener('click', ()=>{ flipped=!flipped; render(); });
+  countEl.textContent = `${pos+1} / ${deck.length}`;
+  bar.style.width = `${((pos+1)/deck.length)*100}%`;
+}
+
+function advance(){
+  flipped=false;
+  if(pos < deck.length-1){ pos++; }
+  else if(reviewQueue.length){ deck = reviewQueue; reviewQueue=[]; pos=0; }
+  else { pos = deck.length; render(); return; }
+  render();
+}
+
+document.getElementById('nextBtn').addEventListener('click', advance);
+document.getElementById('prevBtn').addEventListener('click', ()=>{
+  flipped=false;
+  pos = Math.max(0,pos-1);
+  render();
+});
+document.getElementById('knowBtn').addEventListener('click', advance);
+document.getElementById('dontBtn').addEventListener('click', ()=>{
+  reviewQueue.push(deck[pos]);
+  advance();
+});
+
+render();
+</script>
+</body>
+</html>
