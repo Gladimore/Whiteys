@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Whitey's Recipe Guide Study Cards</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --cream:#FBF3E2; --cream2:#F3E8D2; --fudge:#3A2318; --fudge2:#5B3C2A;
+    --teal:#2C7A94; --teal-dk:#1F5C71; --raspberry:#C1443A; --paper:#FFFDF8;
+    --line: rgba(58,35,24,0.14);
+  }
+  :root:not([data-theme="light"]){}
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --cream:#211611; --cream2:#2A1D16; --fudge:#F3E8D2; --fudge2:#D8C4A8;
+      --teal:#5FB2CC; --teal-dk:#8FCBDF; --paper:#2C1F17; --line: rgba(243,232,210,0.14);
+    }
+  }
+  :root[data-theme="dark"]{
+    --cream:#211611; --cream2:#2A1D16; --fudge:#F3E8D2; --fudge2:#D8C4A8;
+    --teal:#5FB2CC; --teal-dk:#8FCBDF; --paper:#2C1F17; --line: rgba(243,232,210,0.14);
+  }
+  *{box-sizing:border-box;}
+  html{scroll-padding-top:env(safe-area-inset-top,0px);}
+  body{
+    margin:0; min-height:100%; background:var(--cream); color:var(--fudge);
+    font-family:'Inter',system-ui,-apple-system,sans-serif;
+    padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+    display:flex; flex-direction:column; align-items:center;
+  }
+  .wrap{ width:100%; max-width:640px; padding:28px 20px 40px; }
+  header{ text-align:center; margin-bottom:6px; }
+  h1{
+    font-family:'Fraunces',serif; font-weight:700; font-size:clamp(1.5rem,6vw,2.1rem);
+    margin:0 0 4px; letter-spacing:-0.01em;
+  }
+  .sub{ font-size:0.92rem; color:var(--fudge2); margin:0 0 20px; }
+  .toolbar{ display:flex; justify-content:space-between; align-items:center; gap:10px; margin-bottom:14px; }
+  .count{ font-size:0.85rem; color:var(--fudge2); font-variant-numeric:tabular-nums; }
+  .catpick{
+    font-family:inherit; font-size:0.82rem; padding:6px 10px; border-radius:8px;
+    border:1px solid var(--line); background:var(--paper); color:var(--fudge);
+  }
+  .progress{ height:4px; background:var(--line); border-radius:4px; overflow:hidden; margin-bottom:22px; }
+  .progress > div{ height:100%; background:var(--teal); transition:width .25s ease; }
+
+  .stage{ perspective:1400px; }
+  .card{
+    position:relative; width:100%; min-height:280px; border-radius:18px;
+    cursor:pointer; transform-style:preserve-3d; transition:transform .5s cubic-bezier(.2,.7,.3,1);
+  }
+  .card.flipped{ transform:rotateY(180deg); }
+  .face{
+    position:absolute; inset:0; backface-visibility:hidden; border-radius:18px;
+    background:var(--paper); border:1px solid var(--line);
+    padding:30px 26px; display:flex; flex-direction:column;
+    box-shadow:0 1px 0 var(--line), 0 14px 30px -20px rgba(58,35,24,0.35);
+  }
+  .face .body{ flex:1; display:flex; align-items:center; }
+  .tag{
+    display:inline-block; font-size:0.72rem; font-weight:600; color:var(--teal-dk);
+    background:color-mix(in srgb, var(--teal) 14%, transparent); padding:4px 10px;
+    border-radius:20px; width:fit-content; margin-bottom:14px;
+  }
+  .qtext{ font-family:'Fraunces',serif; font-weight:500; font-size:clamp(1.15rem,4.4vw,1.4rem); line-height:1.35; }
+  .atext{ font-size:1.02rem; line-height:1.55; color:var(--fudge); }
+  .frac{ display:inline-flex; flex-direction:column; align-items:center; line-height:1; vertical-align:-0.35em; margin:0 1px; font-size:0.82em; }
+  .frac .num{ border-bottom:1px solid currentColor; padding:0 2px 1px; }
+  .frac .den{ padding:1px 2px 0; }
+  .hint{ font-size:0.78rem; color:var(--fudge2); margin-top:16px; }
+  .back{ transform:rotateY(180deg); border-color:color-mix(in srgb, var(--teal) 40%, var(--line)); }
+
+  .controls{ display:flex; gap:10px; margin-top:20px; }
+  button{
+    font-family:inherit; font-size:0.9rem; font-weight:600; cursor:pointer;
+    border-radius:12px; border:1px solid var(--line); background:var(--paper); color:var(--fudge);
+    padding:12px 14px; flex:1; transition:transform .12s ease, background .15s ease;
+  }
+  button:active{ transform:scale(0.96); }
+  button.primary{ background:var(--teal); border-color:var(--teal); color:#fff; }
+  button.ghost{ flex:0 0 auto; background:transparent; }
+  .known-row{ display:flex; gap:10px; margin-top:10px; }
+  .known-row button.yes{ color:var(--teal-dk); }
+  .known-row button.no{ color:var(--raspberry); }
+
+  .picks{ display:flex; gap:6px; }
+  .save{ margin-top:22px; border:1px solid var(--line); border-radius:14px; background:var(--paper); padding:4px 14px; }
+  .save summary{ cursor:pointer; font-weight:600; font-size:0.9rem; padding:10px 0; }
+  .save .row{ display:flex; gap:8px; flex-wrap:wrap; margin:8px 0; }
+  .save button{ flex:1 1 40%; padding:10px 10px; font-size:0.84rem; }
+  .save textarea{ width:100%; min-height:84px; font:12px ui-monospace,Menlo,monospace; border:1px solid var(--line); border-radius:10px; background:var(--cream); color:var(--fudge); padding:8px; resize:vertical; }
+  .msg{ font-size:0.8rem; color:var(--fudge2); min-height:1.2em; margin:6px 0 10px; line-height:1.4; }
+  .stats{ font-size:0.8rem; color:var(--fudge2); margin:-12px 0 16px; text-align:center; }
+  .stats b{ color:var(--teal-dk); }
+  footer{ text-align:center; font-size:0.75rem; color:var(--fudge2); margin-top:28px; line-height:1.6; }
+  .done{ text-align:center; padding:40px 10px; }
+  .done h2{ font-family:'Fraunces',serif; margin-bottom:8px; }
+
+[hidden]{display:none!important}
+.tabs{display:flex;gap:8px;margin:0 0 16px}.tabs button.on{background:var(--teal);color:#fff;border-color:var(--teal)}
+.gcard{background:var(--paper);border:1px solid var(--line);border-radius:18px;padding:24px 22px;min-height:220px}
+.gtime{font-family:'Fraunces',serif;font-size:3rem;text-align:center;margin-top:10px;font-variant-numeric:tabular-nums}.gtime.low{color:var(--raspberry)}
+.gbar{height:6px;background:var(--line);border-radius:6px;overflow:hidden;margin-top:16px}.gbar>div{height:100%;width:100%;background:var(--teal)}
+.gans{margin-top:14px;background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:16px 18px;line-height:1.55;font-size:.98rem}.gans ul{margin:4px 0 10px;padding-left:20px}.typing::after{content:'\25AE';opacity:.6}.gshort{font-family:'Fraunces',serif;font-size:1.3rem;font-weight:600;margin:4px 0 8px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Whitey's Recipe Guide Cram Sheet</h1>
+    <p class="sub">Tap a card to flip it. Bostons, Cones, Packages &amp; Sundaes (pages 3&ndash;4) plus flavors.</p>
+  </header>
+<div class="tabs"><button id="tabCards" class="on">Flashcards</button><button id="tabGame">Order Game</button></div>
+<div id="cardsView">
+
+  <div class="toolbar">
+    <span class="count" id="count">1 / 52</span>
+    <div class="picks"><select class="catpick" id="catpick"></select><select class="catpick" id="modepick"><option value="all">All cards</option><option value="todo">Not mastered</option><option value="missed">Missed last time</option></select></div>
+  </div>
+  <div class="progress"><div id="progressbar" style="width:0%"></div></div>
+  <div class="stats" id="stats"></div>
+
+  <div id="stageHolder"></div>
+
+  <div class="controls" id="mainControls">
+    <button class="ghost" id="shuffleBtn" title="Shuffle">Shuffle</button>
+    <button id="prevBtn">&larr; Prev</button>
+    <button class="primary" id="nextBtn">Next &rarr;</button>
+  </div>
+  <div class="known-row">
+    <button class="yes" id="knowBtn">✓ Got it</button>
+    <button class="no" id="dontBtn">↻ Review again</button>
+  </div>
+
+
+  <details class="save" id="savePanel">
+    <summary>Save / load progress</summary>
+    <div class="row">
+      <button id="exportBtn" class="primary">Export save file</button>
+      <button id="importBtn">Import save file</button>
+    </div>
+    <input type="file" id="fileIn" accept=".json,application/json,text/plain" style="display:none">
+    <div class="msg" id="saveMsg">Progress also autosaves in this browser. Use a save file to move it between devices.</div>
+    <textarea id="codeBox" placeholder="Save code appears here after Export. To load, paste a save code here and tap Load code." spellcheck="false"></textarea>
+    <div class="row">
+      <button id="copyBtn">Copy code</button>
+      <button id="loadBtn">Load code</button>
+      <button id="resetBtn">Reset progress</button>
+    </div>
+  </details>
+
+  </div>
+<div id="gameView" hidden>
+ <div class="toolbar"><select class="catpick" id="gCat"><option value="all">All orders (mostly new material)</option><option value="shakes">Shakes &amp; malts (pp. 1&ndash;2)</option><option value="p3">Bostons, cones, packages (p. 3)</option><option value="sun">Sundaes &amp; specials (p. 4)</option></select><select class="catpick" id="gN"><option value="1">1 item</option><option value="2">2 items</option><option value="3">3 items</option></select></div>
+ <div class="toolbar"><label class="count"><input type="checkbox" id="gSnd" checked> Sound</label></div>
+ <div class="count" id="gScore" style="margin:6px 0 12px"></div>
+ <div class="gcard"><div class="tag">Customer</div><div id="gOrder" class="qtext">Tap Start. The order types out, stays 5 seconds, then vanishes.</div><div class="gbar"><div id="gBar"></div></div><div id="gTime" class="gtime">5</div></div>
+ <div id="gAns" class="gans" hidden></div>
+ <div class="controls"><button class="primary" id="gStart">Start customer</button><button id="gReveal" disabled>Reveal answer</button></div>
+ <div class="known-row" id="gGrade" hidden><button class="yes" id="gOk">Matched my paper</button><button class="no" id="gNo">Missed some</button></div>
+ <div class="count" id="gMsg" style="margin-top:10px"></div>
+</div>
+<footer>
+    Bare topping numbers on the guide are read as scoops/pumps; UOJ means use own judgment.<br>
+    A card counts as mastered after 3 correct answers in a row; any miss resets it.
+  </footer>
+</div>
+
+<script>
+const CARDS = [
+["Bostons", "What exactly is a Boston?", "A shake/malt with a sundae on top, served in the large size only."],
+["Bostons", "A customer asks for a small Boston. What do you tell them?", "Bostons come in the large size only."],
+["Bostons", "Recite the 5 rules for Bostons.", "1) Large only; 2) use the recipe for a large shake; 3) fill to the apostrophe; 4) 4 oz. dip; 5) 1 scoop/pump of topping (2 for HF)."],
+["Bostons", "Boston rule 2: which shake recipe do you use?", "The recipe for a large shake."],
+["Bostons", "Boston rule 3: how full do you fill the shake?", "Fill it to the apostrophe."],
+["Bostons", "Boston rule 4: how big is the dip on top, and what flavor?", "A 4 oz. dip of Vanilla."],
+["Bostons", "Boston rule 5: how much topping goes on the sundae?", "1 scoop/pump of topping, or 2 scoops/pumps if the topping is Hot Fudge (HF)."],
+["Bostons", "The shake part of a Boston is made with one of our flavored ice creams. What do you press on the register?", "The “Ice Cream Boston” button, IN ADDITION TO one of the three Boston register buttons."],
+["Bostons", "Name the three Boston register buttons.", "Regular Boston, Hot Fudge Boston, and Double Fudge Boston."],
+["Bostons", "True or false: the “Ice Cream Boston” button replaces the Regular/Hot Fudge/Double Fudge Boston button.", "False. You press it in addition to one of those three buttons."],
+["Bostons", "Which Boston is a regular priced shake with a regular priced sundae (not HF)?", "Regular Boston."],
+["Bostons", "Regular Boston: give the whole build.", "Large shake recipe filled to the apostrophe, topped with a 4 oz. dip of Vanilla and 1 scoop/pump of topping. Ring it up as Regular Boston."],
+["Bostons", "Double Fudge Boston: what goes on top of the large shake?", "A 4 oz. dip of Vanilla with 2 scoops/pumps of Hot Fudge."],
+["Bostons", "What counts as an HF-priced shake or malt on a Boston?", "Hot Fudge, Banana, or Cake Batter. Everything else on the regular list is a regular-priced shake."],
+["Bostons", "What counts as an HF-priced sundae on a Boston?", "A Hot Fudge sundae: 2 pumps of Hot Fudge on top of the 4 oz. Vanilla dip."],
+["Bostons", "Boston toppings: how many pumps for Hot Fudge, and how many for any other topping?", "Hot Fudge: 2 pumps. Any other topping: 1 pump (or 1 scoop for a fruit topping)."],
+["Bostons", "Regular Boston: is the shake HF-priced or regular? Is the sundae HF-priced or regular?", "Both regular. Regular-priced shake + regular-priced sundae (not HF)."],
+["Bostons", "Hot Fudge Boston: there are two ways to get one. What are they?", "(1) Regular-priced shake + HF-priced sundae, OR (2) HF-priced shake + regular-priced sundae. Exactly ONE of the two parts is HF."],
+["Bostons", "Hot Fudge Boston, version 1: the shake is regular-priced (like Vanilla). What goes on the sundae?", "The sundae is the HF part: a 4 oz. dip of Vanilla with 2 pumps of Hot Fudge."],
+["Bostons", "Hot Fudge Boston, version 2: the shake is HF-priced (Hot Fudge, Banana, or Cake Batter). What goes on the sundae?", "The shake is the HF part, so the sundae is regular: a 4 oz. dip of Vanilla with 1 pump of a non-Hot-Fudge topping."],
+["Bostons", "Double Fudge Boston: is the shake HF-priced or regular? Is the sundae HF-priced or regular?", "Both HF-priced: an HF-priced shake (Hot Fudge, Banana, or Cake Batter) + a Hot Fudge sundae."],
+["Bostons", "Which Boston has BOTH an HF-priced shake and an HF-priced sundae?", "Double Fudge Boston."],
+["Bostons", "The shake is regular-priced and the sundae is Hot Fudge. Which Boston button?", "Hot Fudge Boston."],
+["Bostons", "The shake is HF-priced and the sundae is a regular topping. Which Boston button?", "Hot Fudge Boston."],
+["Bostons", "Both the shake and the sundae are regular-priced. Which Boston button?", "Regular Boston."],
+["Bostons", "Which Boston buttons have NO HF-priced part, ONE HF-priced part, and TWO HF-priced parts?", "None: Regular Boston. One: Hot Fudge Boston. Two: Double Fudge Boston."],
+["Cones/Single Servings", "Mini Dip: how many ounces, and which cup?", "2 oz., in a Mini Dip cup."],
+["Cones/Single Servings", "One Dip: how many ounces, and which cup?", "4-5 oz., in a One Dip cup."],
+["Cones/Single Servings", "Two Dip: how many ounces, and which cup?", "8 oz., in a Two Dip cup."],
+["Cones/Single Servings", "Three Dip: how many ounces, and which cup?", "12 oz., in a Two Dip cup."],
+["Cones/Single Servings", "What's in a Flavor Flight, and what does it come in?", "Four 2 oz. dips, served in a Banana Boat."],
+["Cones/Single Servings", "Which cup does a Three Dip go in?", "A Two Dip cup, the same cup as a Two Dip."],
+["Cones/Single Servings", "Which cup does a Flavor Flight go in?", "A Banana Boat."],
+["Cones/Single Servings", "Which servings use a Two Dip cup?", "Two Dip (8 oz.) and Three Dip (12 oz.)."],
+["Cones/Single Servings", "Which single servings are served in a Mini Dip cup?", "The Mini Dip (2 oz.) and the Pup Cup."],
+["Cones/Single Servings", "Which serving is 12 oz.?", "The Three Dip, in a Two Dip cup."],
+["Cones/Single Servings", "Which serving weighs 4-5 oz.?", "The One Dip, in a One Dip cup."],
+["Cones/Single Servings", "Which serving weighs 8 oz.?", "The Two Dip, in a Two Dip cup."],
+["Cones/Single Servings", "Which serving is a single 2 oz. dip?", "The Mini Dip, in a Mini Dip cup."],
+["Cones/Single Servings", "A customer wants a waffle cone or a waffle bowl. What do you know about the register?", "The waffle cone and waffle bowl buttons are an additional charge."],
+["Cones/Single Servings", "Which two items have their own register buttons that cost extra?", "The waffle cone and the waffle bowl."],
+["Cones/Single Servings", "What's a Pup Cup?", "A mini dip of vanilla with a dog bone on top, served in a mini dip cup."],
+["Cones/Single Servings", "Which one is this? A mini dip of vanilla with a dog bone on top in a mini dip cup.", "The Pup Cup."],
+["Cones/Single Servings", "What's a Flavor Flight?", "4 mini scoops in a banana boat."],
+["Cones/Single Servings", "Which one is this? Four 2 oz. dips in a banana boat.", "The Flavor Flight."],
+["Packages", "How big is a pint, and how can it be packed?", "16 oz., prepackaged or handpacked."],
+["Packages", "How big is a quart, and how can it be packed?", "32 oz., prepackaged or handpacked."],
+["Packages", "Which package sizes can be handpacked?", "Pints (16 oz.) and quarts (32 oz.)."],
+["Packages", "Which packages are prepackaged only?", "1 1/2 quarts and the 4 qt. (1 gallon) pails of Vanilla."],
+["Packages", "Describe the 4 qt. pail.", "1 gallon of Vanilla, available prepackaged only."],
+["Packages", "Which package is 1 gallon?", "The 4 qt. pail of Vanilla (prepackaged only)."],
+["Packages", "Which package is 32 oz., and which is 16 oz.?", "Quart = 32 oz.; pint = 16 oz."],
+["Sundaes", "What must you do with ALL sundaes?", "They must all be weighed."],
+["Sundaes", "How do you build a sundae with fruit?", "Use mostly fruit with juice. For Strawberry, Pineapple, Peach, and Red Raspberry, use plenty of fruit."],
+["Sundaes", "Which cup does a 1 Dip sundae go in?", "A one dip cup."],
+["Sundaes", "Which cup does a 2 Dip sundae go in?", "A two dip cup."],
+["Sundaes", "Which cup does a 3 Dip sundae go in?", "A large shake cup or a boat."],
+["Sundaes", "Which sundae sizes go in which cup?", "1 Dip: one dip cup. 2 Dip: two dip cup. 3 Dip: large shake cup or boat."],
+["Sundaes", "What ice cream do you assume for a sundae?", "Vanilla, unless the customer or the recipe specifies otherwise."],
+["Sundaes", "A customer wants their sundae with chocolate ice cream instead of vanilla. Is there an extra charge?", "No. There is no additional charge for using an ice cream other than vanilla."],
+["Sundaes", "How much ice cream is in a 1 Dip sundae?", "One 6 oz. dip."],
+["Sundaes", "How much ice cream is in a 2 Dip sundae?", "Two 4 oz. dips (8 oz. total)."],
+["Sundaes", "How much ice cream is in a 3 Dip sundae?", "Three 4 oz. dips (12 oz. total)."],
+["Sundaes", "Chocolate, Butterscotch, or Marshmallow sundae: how much topping?", "UOJ (use own judgment) for 1, 2, and 3 Dip."],
+["Sundaes", "What does UOJ stand for?", "Use own judgment."],
+["Sundaes", "Strawberry, Pineapple, Peach, or Red Raspberry sundae: how much topping for 1 / 2 / 3 Dip?", "1 1/2 scoops (1 Dip), 2 scoops (2 Dip), 3 scoops (3 Dip). Use plenty of fruit."],
+["Sundaes", "Hot Fudge sundae: how much topping for 1 / 2 / 3 Dip?", "3 scoops/pumps (1 Dip), 5 scoops/pumps (2 Dip), 7 scoops/pumps (3 Dip)."],
+["Sundaes", "Which toppings are UOJ?", "Chocolate, Butterscotch, and Marshmallow."],
+["Sundaes", "Which toppings are the fruit toppings with the “use plenty of fruit” note?", "Strawberry, Pineapple, Peach, and Red Raspberry."],
+["Sundaes", "Give the entire recipe for a 1 Dip Hot Fudge sundae.", "6 oz. dip of Vanilla in a one dip cup, 3 scoops/pumps of Hot Fudge, weighed."],
+["Sundaes", "Give the entire recipe for a 3 Dip Hot Fudge sundae.", "Three 4 oz. dips of Vanilla in a large shake cup or boat, 7 scoops/pumps of Hot Fudge, weighed."],
+["Sundaes", "Give the entire recipe for a 2 Dip Strawberry sundae.", "Two 4 oz. dips of Vanilla in a two dip cup, 2 scoops of Strawberry (mostly fruit with juice, plenty of fruit), weighed."],
+["Special Sundaes", "What sizes do all Special Sundaes come in?", "1 Dip (6 oz.) and 2 Dip (4 oz. each, 8 oz. total)."],
+["Special Sundaes", "Which cup does a 1 Dip Special Sundae go in?", "An 8 oz. sundae cup (unless otherwise noted)."],
+["Special Sundaes", "Which cup does a 2 Dip Special Sundae go in?", "A 16 oz. sundae cup (unless otherwise noted)."],
+["Special Sundaes", "Name the five Special Sundaes.", "Turtle, Cherry Bon Bon, Dusty Road, S’mores, and Brownie Under."],
+["Special Sundaes", "Turtle, 1 Dip: full recipe?", "6 oz. dip in an 8 oz. sundae cup, 3/4 scoop/pump Butterscotch, 2 scoops/pumps Hot Fudge, 3 spoons Pecans."],
+["Special Sundaes", "Turtle, 2 Dip: full recipe?", "Two 4 oz. dips in a 16 oz. sundae cup, 1 scoop/pump Butterscotch, 3 scoops/pumps Hot Fudge, 4 spoons Pecans."],
+["Special Sundaes", "Which Special Sundae has Butterscotch, Hot Fudge, and Pecans?", "The Turtle."],
+["Special Sundaes", "Cherry Bon Bon, 1 Dip: full recipe?", "6 oz. dip in an 8 oz. sundae cup, 2 scoops/pumps Hot Fudge, 1 scoop Black Cherry."],
+["Special Sundaes", "Cherry Bon Bon, 2 Dip: full recipe?", "Two 4 oz. dips in a 16 oz. sundae cup, 3 scoops/pumps Hot Fudge, 1 1/2 scoops Black Cherry."],
+["Special Sundaes", "Which Special Sundae is Hot Fudge plus Black Cherry?", "The Cherry Bon Bon."],
+["Special Sundaes", "Dusty Road, 1 Dip: full recipe?", "6 oz. dip in an 8 oz. sundae cup, Chocolate (UOJ), 1 heaping spoon of Malt Powder."],
+["Special Sundaes", "Dusty Road, 2 Dip: full recipe?", "Two 4 oz. dips in a 16 oz. sundae cup, Chocolate (UOJ), 1 1/2 heaping spoons of Malt Powder."],
+["Special Sundaes", "Which Special Sundae is Chocolate plus Malt Powder?", "The Dusty Road."],
+["Special Sundaes", "Which ice cream goes in a S’mores sundae?", "GCS ice cream."],
+["Special Sundaes", "S’mores, 1 Dip Graham: full recipe?", "6 oz. dip of GCS in an 8 oz. sundae cup, 1 scoop/pump Marshmallow, 2 scoops/pumps Hot Fudge, 1 scoop Chocolate Chips."],
+["Special Sundaes", "S’mores, 2 Dip Graham: full recipe?", "Two 4 oz. dips of GCS in a 16 oz. sundae cup, 2 scoops/pumps Marshmallow, 3 scoops/pumps Hot Fudge, 2 scoops Chocolate Chips."],
+["Special Sundaes", "Which Special Sundae has Marshmallow, Hot Fudge, and Chocolate Chips on GCS ice cream?", "The S’mores."],
+["Special Sundaes", "Brownie Under, 1 Dip: brownie and Hot Fudge?", "1 brownie and 2 scoops/pumps Hot Fudge."],
+["Special Sundaes", "Brownie Under, 2 Dip: brownie and Hot Fudge?", "1 brownie and 3 scoops/pumps Hot Fudge."],
+["Special Sundaes", "Brownie Under: what's the topping?", "2 spoons mixed nuts, whipped cream, 1 spoon mixed nuts, and 1 cherry."],
+["Special Sundaes", "Which cup does a 1 Dip Brownie Under go in?", "A 2 dip cup or a med. cup (not the usual 8 oz. sundae cup)."],
+["Special Sundaes", "Which cup does a 2 Dip Brownie Under go in?", "A boat or a large cup."],
+["Special Sundaes", "How do you build a 2 Dip Brownie Under in a boat?", "Cut the brownie in half, put a scoop of ice cream on each half, then add toppings."],
+["Special Sundaes", "How do you build a 2 Dip Brownie Under in a large cup?", "Layer brownie, ice cream, fudge. Repeat, then add nuts, whipped cream, and a cherry."],
+["Special Sundaes", "Which Special Sundaes use Hot Fudge?", "Turtle, Cherry Bon Bon, S’mores, and Brownie Under (not Dusty Road)."],
+["Special Sundaes", "Which Special Sundae does NOT use Hot Fudge?", "The Dusty Road."],
+["Special Sundaes", "Which Special Sundaes include nuts?", "Turtle (pecans) and Brownie Under (mixed nuts)."],
+["Special Sundaes", "Which Special Sundaes include a cherry?", "Cherry Bon Bon (Black Cherry) and Brownie Under (1 cherry on top)."],
+["Special Sundaes", "Which Special Sundae uses UOJ for a topping?", "The Dusty Road (Chocolate)."],
+["Special Sundaes", "Which Special Sundae doesn’t follow the usual cup rule for 1 Dip and 2 Dip?", "The Brownie Under: 1 Dip goes in a 2 dip cup or med. cup, 2 Dip in a boat or large cup."],
+["Customer Orders","\"Can I get a small Red Raspberry shake?\"","Regular shake — 2 scoops MM, then 1 1/2 scoops Red Raspberry flavoring (Small amount)."],
+["Customer Orders","\"I'll have a large Chocolate malt.\"","2 scoops MM + a heaping scoop of malt powder (that's what makes it a malt), then 3 scoops Chocolate flavoring (Large amount)."],
+["Customer Orders","\"Medium Vanilla shake, but can you make it kind of thin?\"","Ask how thin they'd like it, then add milk accordingly. Base is still 2 scoops MM + 2 scoops Vanilla flavoring (Medium amount), just thinned with milk to taste."],
+["Customer Orders","\"Small Peach shake, easy on the peach flavor please.\"","Cut back — 2 scoops MM, then 1 scoop Peach flavoring (Small cut-back amount)."],
+["Customer Orders","\"Large Hot Fudge shake please.\"","2 scoops MM + 4 scoops Hot Fudge (Large amount)."],
+["Customer Orders","\"Small Hot Fudge shake, not too much fudge though.\"","Cut back — 2 scoops MM + 1 1/2 scoops Hot Fudge (Small cut-back amount)."],
+["Customer Orders","\"Medium Cake Batter shake, sprinkles on top.\"","2 scoops MM + 1 scoop powder + 1 scoop liquid Cake Batter mix (Medium amount), sprinkles on top since they asked."],
+["Customer Orders","\"Can I get a large banana shake?\"","2 scoops MM + a dash of vanilla + a medium banana (Large still uses a medium banana, same as Medium size)."],
+["Customer Orders","\"Small banana shake, but add strawberry flavor too.\"","Banana with a flavor — cut back the strawberry flavoring to 1 scoop (Small cut-back amount), use only 1/2 a banana, plus 2 scoops MM."],
+["Customer Orders","\"Can I get a small Black Cherry shake?\"","2 scoops MM + 1 1/2 scoops Black Cherry flavoring (Small amount)."],
+["Customer Orders","\"Medium Black Cherry, but go easy on the cherry flavor.\"","Cut back — 2 scoops MM + 1 1/2 scoops Black Cherry (Medium cut-back amount). Don't charge for this cut back — ring it up as \"Add Special\" instead."],
+["Customer Orders","\"Large Butterfinger shake, vanilla flavoring.\"","2 scoops MM + 3 heaping scoops Butterfinger (Large amount) + 2 scoops vanilla flavoring, cut back (Large cut-back amount)."],
+["Customer Orders","\"Small Oreo shake, chocolate flavor.\"","2 scoops MM + 4 Oreos inside, 1 Oreo on top + 1 scoop chocolate flavoring, cut back (Small cut-back amount)."],
+["Customer Orders","\"Medium Candy Bar shake, Kit Kat please.\"","2 scoops MM + 1 full package of Kit Kat + your choice of vanilla or chocolate flavoring, cut back to 1 1/2 scoops (Medium cut-back amount)."],
+["Customer Orders","\"Can I get a large CCCD shake?\"","2 scoops MM + 2 scoops Butterscotch + 3 scoops CCCD mixed in with the candy scoop + a light sprinkle of CCCD on top (Large amount)."],
+["Customer Orders","\"Small Turtle Shake please.\"","2 scoops MM + 1/2 scoop Butterscotch + 1 1/2 scoops Hot Fudge + 3 pecans mixed in + 1 pecan on top (Small amount)."],
+["Customer Orders","\"Medium Brownie shake, go light on the vanilla.\"","Cut the brownie into cubes and add it at the very end of mixing to keep it chunky. Cut back the vanilla flavoring — 2 scoops MM + 1 1/2 scoops vanilla (Medium cut-back amount)."],
+["Customer Orders","\"Small Cherry Bon Bon.\"","2 scoops MM + 1 1/2 scoops Hot Fudge + 3/4 scoop Black Cherries (Small amount)."],
+["Customer Orders","\"Can I get a Banana Split Shake?\"","Large only. Inside: 1 scoop Strawberry, 1 scoop Pineapple, 1 scoop Peach, 2 spoons Mixed Nuts, filled to the apostrophe in the Whitey's logo. On top: thin banana slices (or 1/2 a large banana), whipped cream to fill the cup, 1 spoon mixed nuts, and a cherry."],
+["Customer Orders","\"Small Flavored Ice Cream shake — Vanilla, and can you add another flavor too?\"","1 1/2 cone-size scoops Vanilla ice cream (Small amount) + a second flavoring, cut back to 1 scoop (Small cut-back amount)."],
+["Customer Orders","\"This Flavored Ice Cream shake needs to be thicker — can you add more vanilla ice cream?\"","No — add more MM instead. Never add more flavored ice cream to thicken it."],
+["Customer Orders","\"Can you add a half banana to my Oreo shake?\"","Yes — since Oreo is a Special shake, press Misc. Extras and use the $0.40 extra button."],
+["Customer Orders","\"I've got a Black Cherry shake here, can you throw some Cake Batter mix in it too?\"","Yes — since Black Cherry is a Special shake, press Misc. Extras and use the $0.40 extra button for the added Cake Batter."],
+["Customer Orders","\"Small Kona Coffee malt, and can you make it really thin?\"","2 scoops MM + a heaping scoop of malt powder + 1 1/2 scoops Kona Coffee flavoring (Small amount), then ask how thin they want it and add milk accordingly."],
+["Customer Orders","You just built: 2 scoops MM, 1 Butterscotch, 3 Hot Fudge, 4 pecans in, 2 pecans on top. What did the customer order?","A large Turtle Shake."],
+["Customer Orders","You just built: 2 scoops MM, 4 Oreos inside, 1 on top, and 1 scoop of chocolate flavoring. What size Oreo shake is this?","Small — the flavoring cut-back amount of 1 scoop is the tell (the Oreo count itself doesn't change by size)."],
+["Customer Orders","A customer's order comes out to 2 scoops MM + 2 scoops Peach flavoring — what did they order?","A medium regular Peach shake (full amount, not cut back)."],
+["Customer Orders", "“Can I get a Boston with a Strawberry shake and a Strawberry sundae?”", "Large Strawberry shake recipe filled to the apostrophe, topped with a 4 oz. dip of Vanilla and 1 scoop/pump Strawberry. Press Regular Boston."],
+["Customer Orders", "“Can I get a small Boston?”", "Bostons come in the large size only. Use the large shake recipe."],
+["Customer Orders", "“I’ll have a Three Dip of Chocolate.”", "12 oz. of Chocolate, served in a Two Dip cup."],
+["Customer Orders", "“Can I get a One Dip in a waffle cone?”", "A 4-5 oz. dip in a waffle cone. The waffle cone button is an additional charge."],
+["Customer Orders", "“Can I get a pup cup for my dog?”", "A mini dip (2 oz.) of vanilla with a dog bone on top, in a mini dip cup."],
+["Customer Orders", "“Can I get a flavor flight?”", "Four 2 oz. dips (4 mini scoops) in a banana boat."],
+["Customer Orders", "“Can I get a pint of Strawberry, handpacked?”", "Yes. Pints are 16 oz. and can be prepackaged or handpacked."],
+["Customer Orders", "“Can you handpack me a 1 1/2 quart of Butter Pecan?”", "No. 1 1/2 quarts are available prepackaged only."],
+["Customer Orders", "“Can I get a gallon of Vanilla?”", "Yes. The 4 qt. (1 gallon) pail of Vanilla. It’s available prepackaged only."],
+["Customer Orders", "“Can I get a 2 Dip sundae with Hot Fudge?”", "Two 4 oz. dips of Vanilla in a two dip cup, 5 scoops/pumps Hot Fudge. Weigh it."],
+["Customer Orders", "“Can I get a 1 Dip Strawberry sundae?”", "6 oz. dip of Vanilla in a one dip cup, 1 1/2 scoops Strawberry (mostly fruit with juice, plenty of fruit). Weigh it."],
+["Customer Orders", "“Can I get a 3 Dip Butterscotch sundae with Chocolate ice cream?”", "Three 4 oz. dips of Chocolate in a large shake cup or boat, Butterscotch UOJ. No extra charge for the flavor. Weigh it."],
+["Customer Orders", "“Can I get a 1 Dip Turtle?”", "6 oz. dip in an 8 oz. sundae cup, 3/4 scoop/pump Butterscotch, 2 scoops/pumps Hot Fudge, 3 spoons Pecans."],
+["Customer Orders", "“Can I get a 2 Dip Cherry Bon Bon?”", "Two 4 oz. dips in a 16 oz. sundae cup, 3 scoops/pumps Hot Fudge, 1 1/2 scoops Black Cherry."],
+["Customer Orders", "“Can I get a 1 Dip Dusty Road?”", "6 oz. dip in an 8 oz. sundae cup, Chocolate (UOJ), 1 heaping spoon Malt Powder."],
+["Customer Orders", "“Can I get a 2 Dip S’mores?”", "Two 4 oz. dips of GCS in a 16 oz. sundae cup, 2 scoops/pumps Marshmallow, 3 scoops/pumps Hot Fudge, 2 scoops Chocolate Chips."],
+["Customer Orders", "“Can I get a 1 Dip Brownie Under?”", "6 oz. dip in a 2 dip cup or med. cup, 1 brownie, 2 scoops/pumps Hot Fudge, topped with 2 spoons mixed nuts, whipped cream, 1 spoon mixed nuts, and a cherry."],
+["Customer Orders", "“Can I get a 2 Dip Brownie Under in a boat?”", "Cut 1 brownie in half, put a scoop of ice cream on each half, add 3 scoops/pumps Hot Fudge, then the toppings."],
+["Customer Orders", "You just built: 6 oz. dip, 3/4 Butterscotch, 2 Hot Fudge, 3 spoons Pecans in an 8 oz. sundae cup. What did they order?", "A 1 Dip Turtle."],
+["Customer Orders", "You just built: two 4 oz. dips of GCS, 2 Marshmallow, 3 Hot Fudge, 2 scoops Chocolate Chips in a 16 oz. cup. What did they order?", "A 2 Dip S’mores."],
+["Customer Orders", "You just built: 6 oz. dip, Chocolate, 1 heaping spoon Malt Powder in an 8 oz. cup. What did they order?", "A 1 Dip Dusty Road."],
+["Customer Orders", "You just built: 6 oz. dip, 2 Hot Fudge, 1 Black Cherry in an 8 oz. cup. What did they order?", "A 1 Dip Cherry Bon Bon."],
+["Customer Orders", "You just built: two 4 oz. dips of Vanilla in a two dip cup with 5 scoops/pumps topping. What did they order?", "A 2 Dip Hot Fudge sundae."],
+["Customer Orders", "You just built: 4 mini scoops in a banana boat. What did they order?", "A Flavor Flight."],
+["Customer Orders", "You just built: a mini dip of vanilla with a dog bone in a mini dip cup. What did they order?", "A Pup Cup."],
+["Customer Orders", "“Can I get a Boston with a vanilla shake and hot fudge on top?”", "Large Vanilla shake to the apostrophe (2 scoops MM + 3 scoops Vanilla), 4 oz. Vanilla dip, 2 pumps Hot Fudge. Press Hot Fudge Boston (regular shake + HF sundae)."],
+["Customer Orders", "“Can I get a Boston with a banana shake and chocolate on top?”", "Large Banana shake to the apostrophe (2 scoops MM, a dash of vanilla, 1 medium banana), 4 oz. Vanilla dip, 1 pump Chocolate. Press Hot Fudge Boston (HF-priced shake + regular sundae)."],
+["Customer Orders", "“Can I get a Boston with a hot fudge shake and hot fudge on top?”", "Large Hot Fudge shake to the apostrophe (2 scoops MM + 4 pumps Hot Fudge), 4 oz. Vanilla dip, 2 pumps Hot Fudge. Press Double Fudge Boston (HF-priced shake + HF sundae)."],
+["Customer Orders", "“I’ll have a Double Fudge Boston.”", "An HF-priced shake (Hot Fudge, Banana, or Cake Batter) in the large size to the apostrophe, a 4 oz. Vanilla dip, and 2 pumps Hot Fudge. Press Double Fudge Boston."],
+["Customer Orders", "You just built a Boston: large Chocolate shake, 4 oz. Vanilla dip, 1 pump Butterscotch. Which register button?", "Regular Boston (regular shake + regular sundae)."],
+["Customer Orders", "You just built a Boston: large Vanilla shake, 4 oz. Vanilla dip, 2 pumps Hot Fudge. Which register button?", "Hot Fudge Boston (regular shake + HF sundae)."],
+["Customer Orders", "You just built a Boston: large Hot Fudge shake, 4 oz. Vanilla dip, 1 pump Butterscotch. Which register button?", "Hot Fudge Boston (HF-priced shake + regular sundae)."],
+["Customer Orders", "You just built a Boston: large Hot Fudge shake, 4 oz. Vanilla dip, 2 pumps Hot Fudge. Which register button?", "Double Fudge Boston (HF-priced shake + HF sundae)."],
+["Customer Orders", "You just built a Boston: large Banana shake, 4 oz. Vanilla dip, 2 pumps Hot Fudge. Which register button?", "Double Fudge Boston (Banana is an HF-priced shake + HF sundae)."],
+["Customer Orders", "You just built a Boston: large Cake Batter shake, 4 oz. Vanilla dip, 1 pump Marshmallow. Which register button?", "Hot Fudge Boston (Cake Batter is an HF-priced shake + regular sundae)."],
+["Flavors: What's In It?", "What's in Banana Graham?", "Fresh banana ice cream with a graham cracker revel."],
+["Flavors: What's In It?", "What's in Black Cherry?", "Black cherry flavored ice cream with black cherries mixed throughout."],
+["Flavors: What's In It?", "What's in Black Raspberry Chip?", "Black raspberry flavored ice cream with a hard chocolate swirl."],
+["Flavors: What's In It?", "What's in Black Walnut?", "(Prepackaged pints only) Black walnut flavored ice cream mixed with black walnut pieces."],
+["Flavors: What's In It?", "What's in Blue Moon (aka Smurf)?", "Blue colored, citrus flavored ice cream mixed with miniature marshmallows."],
+["Flavors: What's In It?", "What's in Bubble Gum?", "Bubble gum flavored ice cream mixed with pieces of real gum."],
+["Flavors: What's In It?", "What's in Butter Pecan?", "Butter flavored ice cream with butter-roasted pecans mixed throughout."],
+["Flavors: What's In It?", "What's in Chocolate?", "Whitey's own rich Dutch chocolate ice cream."],
+["Flavors: What's In It?", "What's in Chocolate Chip?", "Vanilla ice cream loaded with two different kinds of chocolate chips."],
+["Flavors: What's In It?", "What's in Chocolate Chip Cookie Dough?", "Brown sugar flavored ice cream mixed with chocolate chips and real cookie dough pieces."],
+["Flavors: What's In It?", "What's in Chocolate Fudge Brownie?", "Dark chocolate flavored ice cream matched with fudge swirls and fudge brownie pieces."],
+["Flavors: What's In It?", "What's in Chocolate Peanut Butter Revel?", "Chocolate flavored ice cream with brownie bits mixed in and peanut butter swirled throughout."],
+["Flavors: What's In It?", "What's in Coconut Joy?", "Coconut ice cream mixed with chocolate-covered almonds."],
+["Flavors: What's In It?", "What's in Cookies Galore?", "A rich vanilla flavored ice cream loaded with chunks of cookie dough pieces and OREO cookies."],
+["Flavors: What's In It?", "What's in Cotton Candy?", "Pink and blue colored ice cream with cotton candy flavoring."],
+["Flavors: What's In It?", "What's in Cup O' Joe Espresso?", "KONA coffee flavored ice cream with a ribbon of espresso fudge and chocolate espresso chips."],
+["Flavors: What's In It?", "What's in French Vanilla?", "Vanilla ice cream with egg yolks added for a richer flavor. Pints and 1 1/2 qts. only."],
+["Flavors: What's In It?", "What's in Graham Central Station?", "Graham cracker flavored ice cream with a crunchy graham cracker swirled throughout."],
+["Flavors: What's In It?", "What's in Gummy Bear?", "Light raspberry flavored ice cream loaded with Gummy Bears."],
+["Flavors: What's In It?", "What's in Mint Chocolate Chip?", "Green, mint flavored ice cream with two kinds of chocolate chips mixed throughout."],
+["Flavors: What's In It?", "What's in Mint Cookie Crunch?", "Mint ice cream mixed with a minty chocolate cookie revel and packed with chunks of OREO."],
+["Flavors: What's In It?", "What's in Mississippi Mud Revel?", "KONA coffee flavored ice cream matched with fudge swirls and mixed with OREO cookie bits."],
+["Flavors: What's In It?", "What's in Moose Tracks?", "Vanilla ice cream with heavy fudge swirled throughout, mixed with chocolate covered peanut butter cups."],
+["Flavors: What's In It?", "What's in Monster Cookie?", "Peanut butter ice cream with a peanut butter oatmeal cookie, chocolate chips, and mini M&M's."],
+["Flavors: What's In It?", "What's in Orange Sherbet?", "Orange flavored sherbet."],
+["Flavors: What's In It?", "What's in Peanut Butter Oreo Fudge?", "Peanut butter ice cream with fudge swirls and Oreo chunks."],
+["Flavors: What's In It?", "What's in Peanut Butter Pretzel Bark?", "Vanilla ice cream with a peanut butter cookie revel and pieces of chocolate covered pretzel bark."],
+["Flavors: What's In It?", "What's in Praline Pecan?", "(Prepackaged in 1 1/2 qt and pints only) Light, butter pecan flavored ice cream with swirls of caramel, pecans and praline pecans (candy-coated pecans)."],
+["Flavors: What's In It?", "What's in Salted Caramel?", "Lightly salted caramel ice cream with a caramel ribbon."],
+["Flavors: What's In It?", "What's in Sgt. Camo?", "Camouflage colored ice cream made from graham cracker and marshmallow ice cream with a ribbon of Whitey's famous fudge. It tastes like s'mores."],
+["Flavors: What's In It?", "What's in Strawberry?", "Fresh strawberries swirled in a strawberry flavored ice cream."],
+["Flavors: What's In It?", "What's in Strawberry Cheesecake?", "Cream cheese flavored ice cream with strawberries swirled throughout and mixed with candy-coated graham cracker bits."],
+["Flavors: What's In It?", "What's in Swiss Almond Chocolate?", "Chocolate flavored ice cream with chocolate-covered almonds."],
+["Flavors: What's In It?", "What's in Vanilla?", "Made with Whitey's exclusive pure Madagascar vanilla bean flavoring."],
+["Flavors: What's In It?", "What's in Watermelon Sherbet?", "Watermelon flavored sherbet."],
+["Flavors: What's In It?", "What's in White Chocolate Raspberry?", "White chocolate flavored ice cream with red raspberry swirled throughout and mixed with dark chocolate chips."],
+["Flavors: What's In It?", "What's in White Tiger Paws?", "Vanilla flavored ice cream mixed with fudge swirls and chunks of OREO cookies."],
+["Flavors: Which One?", "Which flavor is this? Fresh banana ice cream with a graham cracker revel.", "Banana Graham"],
+["Flavors: Which One?", "Which flavor is this? Black raspberry flavored ice cream with a hard chocolate swirl.", "Black Raspberry Chip"],
+["Flavors: Which One?", "Which flavor is this? Blue colored, citrus flavored ice cream mixed with miniature marshmallows.", "Blue Moon (aka Smurf)"],
+["Flavors: Which One?", "Which flavor is this? Butter flavored ice cream with butter-roasted pecans mixed throughout.", "Butter Pecan"],
+["Flavors: Which One?", "Which flavor is this? Brown sugar flavored ice cream mixed with chocolate chips and real cookie dough pieces.", "Chocolate Chip Cookie Dough"],
+["Flavors: Which One?", "Which flavor is this? Dark chocolate flavored ice cream matched with fudge swirls and fudge brownie pieces.", "Chocolate Fudge Brownie"],
+["Flavors: Which One?", "Which flavor is this? Chocolate flavored ice cream with brownie bits mixed in and peanut butter swirled throughout.", "Chocolate Peanut Butter Revel"],
+["Flavors: Which One?", "Which flavor is this? Coconut ice cream mixed with chocolate-covered almonds.", "Coconut Joy"],
+["Flavors: Which One?", "Which flavor is this? A rich vanilla flavored ice cream loaded with chunks of cookie dough pieces and OREO cookies.", "Cookies Galore"],
+["Flavors: Which One?", "Which flavor is this? KONA coffee flavored ice cream with a ribbon of espresso fudge and chocolate espresso chips.", "Cup O' Joe Espresso"],
+["Flavors: Which One?", "Which flavor is this? Vanilla ice cream with egg yolks added for a richer flavor. Pints and 1 1/2 qts. only.", "French Vanilla"],
+["Flavors: Which One?", "Which flavor is this? Graham cracker flavored ice cream with a crunchy graham cracker swirled throughout.", "Graham Central Station"],
+["Flavors: Which One?", "Which flavor is this? Green, mint flavored ice cream with two kinds of chocolate chips mixed throughout.", "Mint Chocolate Chip"],
+["Flavors: Which One?", "Which flavor is this? Mint ice cream mixed with a minty chocolate cookie revel and packed with chunks of OREO.", "Mint Cookie Crunch"],
+["Flavors: Which One?", "Which flavor is this? KONA coffee flavored ice cream matched with fudge swirls and mixed with OREO cookie bits.", "Mississippi Mud Revel"],
+["Flavors: Which One?", "Which flavor is this? Vanilla ice cream with heavy fudge swirled throughout, mixed with chocolate covered peanut butter cups.", "Moose Tracks"],
+["Flavors: Which One?", "Which flavor is this? Peanut butter ice cream with a peanut butter oatmeal cookie, chocolate chips, and mini M&M's.", "Monster Cookie"],
+["Flavors: Which One?", "Which flavor is this? Orange flavored sherbet.", "Orange Sherbet"],
+["Flavors: Which One?", "Which flavor is this? Peanut butter ice cream with fudge swirls and Oreo chunks.", "Peanut Butter Oreo Fudge"],
+["Flavors: Which One?", "Which flavor is this? Vanilla ice cream with a peanut butter cookie revel and pieces of chocolate covered pretzel bark.", "Peanut Butter Pretzel Bark"],
+["Flavors: Which One?", "Which flavor is this? Camouflage colored ice cream made from graham cracker and marshmallow ice cream with a ribbon of Whitey's famous fudge. It tastes like s'mores.", "Sgt. Camo"],
+["Flavors: Which One?", "Which flavor is this? Cream cheese flavored ice cream with strawberries swirled throughout and mixed with candy-coated graham cracker bits.", "Strawberry Cheesecake"],
+["Flavors: Which One?", "Which flavor is this? Chocolate flavored ice cream with chocolate-covered almonds.", "Swiss Almond Chocolate"],
+["Flavors: Which One?", "Which flavor is this? Watermelon flavored sherbet.", "Watermelon Sherbet"],
+["Flavors: Which One?", "Which flavor is this? White chocolate flavored ice cream with red raspberry swirled throughout and mixed with dark chocolate chips.", "White Chocolate Raspberry"],
+["Flavors: Which One?", "Which flavor is this? Vanilla flavored ice cream mixed with fudge swirls and chunks of OREO cookies.", "White Tiger Paws"],
+["Flavor Groups", "Which ice cream flavors are prepackaged only, and in what sizes?", "Black Walnut (pints only); French Vanilla (pints and 1 1/2 qts only); Praline Pecan (1 1/2 qt and pints only)."],
+["Flavor Groups", "Which flavors are dairy-free right now?", "Dairy-Free Lemon Poppyseed and Dairy-Free Mint Chocolate Chip."],
+["Flavor Groups", "Which two flavors are sherbets?", "Orange Sherbet and Watermelon Sherbet."],
+["Flavor Groups", "Which two flavors are KONA coffee flavored, and what's in each?", "Cup O' Joe Espresso (ribbon of espresso fudge + chocolate espresso chips) and Mississippi Mud Revel (fudge swirls + OREO cookie bits)."],
+["Flavor Groups", "Which five flavors contain OREO cookies?", "Cookies Galore, Mint Cookie Crunch, Mississippi Mud Revel, Peanut Butter Oreo Fudge, and White Tiger Paws."],
+["Flavor Groups", "Which two flavors contain cookie dough pieces?", "Chocolate Chip Cookie Dough (brown sugar ice cream base) and Cookies Galore (rich vanilla base, plus OREO)."],
+["Flavor Groups", "Which two flavors have a peanut butter ice cream base?", "Monster Cookie and Peanut Butter Oreo Fudge."],
+["Flavor Groups", "Which flavors use a vanilla ice cream base with mix-ins?", "Chocolate Chip, Cookies Galore, Moose Tracks, Peanut Butter Pretzel Bark, and White Tiger Paws."],
+["Flavor Groups", "Name the mint flavors.", "Mint Chocolate Chip (green, two kinds of chips), Mint Cookie Crunch (minty chocolate cookie revel + OREO chunks), and the dairy-free Mint Chocolate Chip."],
+["Flavor Groups", "Which four flavors include graham cracker?", "Banana Graham (graham cracker revel), Graham Central Station (crunchy graham swirl), Sgt. Camo (graham cracker + marshmallow ice cream), and Strawberry Cheesecake (candy-coated graham cracker bits)."],
+["Flavor Groups", "Which two flavors are mixed with chocolate-covered almonds?", "Coconut Joy (coconut ice cream) and Swiss Almond Chocolate (chocolate ice cream)."],
+["Flavor Groups", "Which two flavors are pecan flavors, and how do they differ?", "Butter Pecan (butter flavored ice cream + butter-roasted pecans) and Praline Pecan (light butter pecan + caramel swirls, pecans, and candy-coated praline pecans; prepackaged only)."],
+["Flavor Groups", "Which two flavors have two different kinds of chocolate chips?", "Chocolate Chip (vanilla base) and Mint Chocolate Chip (green mint base)."],
+["Flavor Groups", "Which flavors are specially colored?", "Blue Moon (blue), Cotton Candy (pink and blue), Mint Chocolate Chip (green), and Sgt. Camo (camouflage)."],
+["Flavor Groups", "What's Blue Moon's other name, and what's in it?", "Smurf — blue colored, citrus flavored ice cream mixed with miniature marshmallows."],
+["Flavor Groups", "Which flavor tastes like s'mores?", "Sgt. Camo."]
+];
+
+const KEY='whiteys-progress-v1';
+const hash=t=>{let h=5381;for(let i=0;i<t.length;i++)h=((h<<5)+h+t.charCodeAt(i))|0;return (h>>>0).toString(36);};
+const IDS=CARDS.map(c=>hash(c[0]+'|'+c[1]));
+let P={v:1,cards:{}};
+try{const o=JSON.parse(localStorage.getItem(KEY)||'null');if(o&&o.cards)P=o;}catch(e){}
+const persist=()=>{try{localStorage.setItem(KEY,JSON.stringify(P));}catch(e){}};
+const ent=i=>P.cards[IDS[i]];
+const mastered=i=>{const e=ent(i);return !!e&&e[0]>=3;};
+const missedLast=i=>{const e=ent(i);return !!e&&e[2]===0;};
+
+let deck=[], pos=0, flipped=false, reviewQueue=[];
+const $=id=>document.getElementById(id);
+const stageHolder=$('stageHolder'), countEl=$('count'), bar=$('progressbar'), catpick=$('catpick'), modepick=$('modepick');
+const GROUPS={
+  "All Recipes":["Bostons","Cones/Single Servings","Packages","Sundaes","Special Sundaes"],
+  "All Flavors":["Flavors: What's In It?","Flavors: Which One?","Flavor Groups"]
+};
+const cats=["All",...Object.keys(GROUPS),...Array.from(new Set(CARDS.map(c=>c[0])))];
+catpick.innerHTML=cats.map(c=>`<option value="${c}">${c}</option>`).join('');
+
+function updateStats(){
+  const m=CARDS.reduce((n,_,i)=>n+(mastered(i)?1:0),0), x=CARDS.reduce((n,_,i)=>n+(missedLast(i)?1:0),0);
+  $('stats').innerHTML=`Mastered <b>${m}</b> / ${CARDS.length} &middot; Missed last time <b>${x}</b>`;
+}
+function buildDeck(){
+  const c=catpick.value, m=modepick.value;
+  deck=CARDS.map((_,i)=>i).filter(i=>(c==="All"||(GROUPS[c]?GROUPS[c].includes(CARDS[i][0]):CARDS[i][0]===c))&&(m==="all"||(m==="todo"&&!mastered(i))||(m==="missed"&&missedLast(i))));
+  pos=0; flipped=false; reviewQueue=[]; render();
+}
+catpick.addEventListener('change',buildDeck);
+modepick.addEventListener('change',buildDeck);
+function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+$('shuffleBtn').addEventListener('click',()=>{shuffle(deck);pos=0;flipped=false;render();});
+
+function formatFractions(t){return t.replace(/(\d+)\/(\d+)/g,(m,n,d)=>`<span class="frac"><span class="num">${n}</span><span class="den">${d}</span></span>`);}
+function controls(on){$('mainControls').style.display=on?'flex':'none';document.querySelector('.known-row').style.display=on?'flex':'none';}
+
+function render(){
+  if(pos>=deck.length){
+    const empty=deck.length===0;
+    stageHolder.innerHTML=`<div class="done"><h2>${empty?'Nothing here yet':'Deck complete 🍒'}</h2><p>${empty?'No cards match this filter.':'Switch to "Not mastered" or "Missed last time" to keep drilling.'}</p></div>`;
+    controls(false); countEl.textContent=`${deck.length} / ${deck.length}`; bar.style.width=empty?'0%':'100%'; updateStats(); return;
+  }
+  controls(true);
+  const [cat,q,a]=CARDS[deck[pos]];
+  stageHolder.innerHTML=`<div class="stage"><div class="card ${flipped?'flipped':''}" id="cardEl">
+    <div class="face front"><span class="tag">${cat}</span><div class="body"><div class="qtext">${formatFractions(q)}</div></div><div class="hint">Tap to reveal the answer</div></div>
+    <div class="face back"><span class="tag">${cat}</span><div class="body"><div class="atext">${formatFractions(a)}</div></div><div class="hint">Tap to flip back</div></div>
+  </div></div>`;
+  $('cardEl').addEventListener('click',()=>{flipped=!flipped;render();});
+  countEl.textContent=`${pos+1} / ${deck.length}`; bar.style.width=`${((pos+1)/deck.length)*100}%`; updateStats();
+}
+function advance(){
+  flipped=false;
+  if(pos<deck.length-1) pos++;
+  else if(reviewQueue.length){deck=reviewQueue;reviewQueue=[];pos=0;}
+  else pos=deck.length;
+  render();
+}
+function record(i,ok){
+  const e=(ent(i)||[0,0,0,0]).slice();
+  if(ok){e[0]++;}else{e[0]=0;e[1]++;}
+  e[2]=ok?1:0; e[3]=Date.now(); P.cards[IDS[i]]=e; persist();
+}
+$('nextBtn').addEventListener('click',advance);
+$('prevBtn').addEventListener('click',()=>{flipped=false;pos=Math.max(0,Math.min(pos,deck.length-1)-1);render();});
+$('knowBtn').addEventListener('click',()=>{record(deck[pos],true);advance();});
+$('dontBtn').addEventListener('click',()=>{record(deck[pos],false);reviewQueue.push(deck[pos]);advance();});
+
+// ---- Save / load ----
+let dl=null;
+try{ if(window.claude&&claude.use) claude.use('downloads').then(d=>{dl=d;}).catch(()=>{}); }catch(e){}
+const say=t=>{$('saveMsg').textContent=t;};
+const makeCode=()=>{P.v=1;P.saved=new Date().toISOString();return JSON.stringify(P);};
+
+$('exportBtn').addEventListener('click',async()=>{
+  const code=makeCode(); $('codeBox').value=code;
+  const name=`whiteys-progress-${new Date().toISOString().slice(0,10)}.json`;
+  if(!dl){say('Direct download isn\u2019t available here. Your save code is in the box below: tap Copy code and paste it into a note or message to yourself.');return;}
+  try{await dl.save({filename:name,data:code});say('Save file sent. If you didn\u2019t get a prompt, copy the code below instead.');}
+  catch(e){say(e&&e.code==='declined'?'Download declined. The code below still works: tap Copy code.':'Download didn\u2019t go through. Tap Copy code and keep the text somewhere safe.');}
+});
+$('copyBtn').addEventListener('click',async()=>{
+  const box=$('codeBox'); if(!box.value) box.value=makeCode();
+  try{await navigator.clipboard.writeText(box.value);say('Copied. Paste it somewhere safe.');}
+  catch(e){box.focus();box.select();try{document.execCommand('copy');say('Copied (or long-press the selected text to copy).');}catch(_){say('Select the text in the box and copy it manually.');}}
+});
+function importText(t){
+  let o; try{o=JSON.parse(t);}catch(e){say('That doesn\u2019t look like a save file.');return;}
+  if(!o||typeof o!=='object'||!o.cards||typeof o.cards!=='object'){say('That file has no progress data.');return;}
+  let n=0; for(const k of Object.keys(o.cards)){const e=o.cards[k]; if(!Array.isArray(e)||e.length<4)continue;
+    const cur=P.cards[k]; if(!cur||e[3]>cur[3]){P.cards[k]=e;n++;}}
+  persist(); updateStats(); buildDeck(); say(`Loaded. ${n} card${n===1?'':'s'} updated (newer answers win).`);
+}
+$('loadBtn').addEventListener('click',()=>{const t=$('codeBox').value.trim(); t?importText(t):say('Paste a save code into the box first.');});
+$('importBtn').addEventListener('click',()=>$('fileIn').click());
+$('fileIn').addEventListener('change',e=>{
+  const f=e.target.files&&e.target.files[0]; if(!f)return;
+  const r=new FileReader(); r.onload=()=>importText(String(r.result)); r.onerror=()=>say('Couldn\u2019t read that file. Try pasting its contents into the box instead.'); r.readAsText(f); e.target.value='';
+});
+let armed=false;
+$('resetBtn').addEventListener('click',()=>{
+  if(!armed){armed=true;$('resetBtn').textContent='Tap again to confirm';setTimeout(()=>{armed=false;$('resetBtn').textContent='Reset progress';},4000);return;}
+  P={v:1,cards:{}};persist();armed=false;$('resetBtn').textContent='Reset progress';buildDeck();say('Progress reset.');
+});
+
+buildDeck();
+// ---- Order game (text only) ----
+const R=a=>a[Math.floor(Math.random()*a.length)],ri=n=>Math.floor(Math.random()*n),ch=p=>Math.random()<p;
+const SZ=['small','medium','large'],PUMP=['Hot Fudge','Butterscotch','Marshmallow'],FRUIT=['Strawberry','Pineapple','Peach','Red Raspberry'];
+const REG=['Vanilla','Chocolate','Strawberry','Peach','Pineapple','Red Raspberry','Butterscotch','Black Raspberry','Blueberry','Lemon','Orange','Lime','Cherry','Root Beer','Kona Coffee','Marshmallow','Peanut Butter','Crème de Menthe'];
+const ICF=['Banana Graham','Black Cherry','Black Raspberry Chip','Blue Moon','Bubble Gum','Butter Pecan','Chocolate','Chocolate Chip','Chocolate Chip Cookie Dough','Chocolate Fudge Brownie','Coconut Joy','Cookies Galore','Cotton Candy',"Cup O' Joe Espresso",'Graham Central Station','Gummy Bear','Mint Chocolate Chip','Mint Cookie Crunch','Mississippi Mud Revel','Moose Tracks','Monster Cookie','Orange Sherbet','Peanut Butter Oreo Fudge','Peanut Butter Pretzel Bark','Salted Caramel','Sgt. Camo','Strawberry','Strawberry Cheesecake','Swiss Almond Chocolate','Vanilla','Watermelon Sherbet','White Chocolate Raspberry','White Tiger Paws'];
+const RA=['1 1/2','2','3'],RC=['1','1 1/2','2'],HA=['2','3','4'],HC=['1 1/2','2','3'];
+const q=(n,w)=>`${n} ${w}${['1','1/2','3/4'].includes(n)?'':'s'}`;
+const un=f=>PUMP.includes(f)?'pump':'scoop',amt=(n,f)=>q(n,un(f))+' '+f,lc=s=>s.toLowerCase(),mk=m=>m?'malt':'shake';
+const MMl=m=>['2 scoops Malt Mix (MM) first'].concat(m?['1 heaping spoon malt powder (makes it a malt)']:[]);
+const W=(s,m,thin,lines,desc,cut)=>({d:`${SZ[s]} ${desc}${cut?R([', easy on the flavor',', but go light on the flavoring']):''}${thin?R([', and make it thin',', nice and thin please']):''}`,a:[...(m==='x'?[]:MMl(m)),...lines,...(thin?['Ask how thin they want it, then add milk accordingly']:[])]});
+const fv=s=>{const v=R(['vanilla','chocolate']);return [v,`${v} flavoring, cut back: ${q(RC[s],'scoop')}`];};
+const reg=()=>{const s=ri(3),f=R(REG),m=ch(.5),c=ch(.3);return W(s,m,ch(.2),[amt((c?RC:RA)[s],f)+' flavoring'+(c?' (cut back)':'')],`${lc(f)} ${mk(m)}`,c);};
+const hf=()=>{const s=ri(3),m=ch(.5),c=ch(.3);return W(s,m,0,[amt((c?HC:HA)[s],'Hot Fudge')+(c?' (cut back)':'')],`hot fudge ${mk(m)}`,c);};
+const cake=()=>{const s=ri(3),m=ch(.5),p=ch(.5);return W(s,m,0,[`Cake Batter: ${['3/4','1','1'][s]} powder + ${['3/4','1','2'][s]} liquid (scoops)`,...(p?['Sprinkles on top']:[])],`cake batter ${mk(m)}${p?' with sprinkles':''}`);};
+const ban=()=>{const s=ri(3),m=ch(.5),f=ch(.4)?R(['Strawberry','Chocolate','Peanut Butter','Butterscotch','Blueberry']):0;return W(s,m,0,f?[`Cut back the ${f}: ${amt(RC[s],f)}`,'1/2 banana']:['A dash of vanilla',`1 ${s?'medium':'small'} banana`],`banana ${mk(m)}${f?' with '+lc(f):''}`);};
+const bc=()=>{const s=ri(3),m=ch(.5),c=ch(.4);return W(s,m,0,[amt((c?RC:RA)[s],'Black Cherry')+' flavoring'+(c?' (cut back)':''),...(c?['Ring up "Add Special" for the cut back (don\'t charge)']:[])],`black cherry ${mk(m)}`,c);};
+const can=()=>{const s=ri(3),m=ch(.4),c=R(['Butterfinger','Snickers',"M&M's",'Heath']),[v,l]=fv(s),x=ch(.2);return W(s,m,0,[`${['2','2','3'][s]} heaping scoops ${c}`,l,...(x?[`Extra ${c}: 1 heaping scoop`]:[])],`${c} ${mk(m)} with ${v}${x?', extra '+c:''}`);};
+const ore=()=>{const s=ri(3),m=ch(.4),[v,l]=fv(s);return W(s,m,0,['4 Oreos inside, 1 Oreo on top',l],`Oreo ${mk(m)} with ${v}`);};
+const cbar=()=>{const s=ri(3),m=ch(.4),c=R(["Reese's PB Cups",'Kit Kat']),[v,l]=fv(s);return W(s,m,0,[`1 package ${c}`,l],`${c} ${mk(m)} with ${v}`);};
+const cd=()=>{const s=ri(3),m=ch(.4);return W(s,m,0,[q(['1','1 1/2','2'][s],'pump')+' Butterscotch',`${['2','2','3'][s]} scoops CCCD mixed in (use the candy scoop)`,'Sprinkle of CCCD on top (not a full scoop)'],`chocolate chip cookie dough ${mk(m)}`);};
+const tur=()=>{const s=ri(3),m=ch(.4);return W(s,m,0,[q(['1/2','3/4','1'][s],'pump')+' Butterscotch',q(['1 1/2','2','3'][s],'pump')+' Hot Fudge',`${['3','3','4'][s]} pecans mixed in`,`${['1','1','2'][s]} pecan${s==2?'s':''} on top`],`turtle ${mk(m)}`);};
+const bro=()=>{const s=ri(3),m=ch(.4),f=R(['vanilla','chocolate','strawberry']);return W(s,m,0,['Cut the brownie in cubes; add it at the END of mixing to keep it chunky',`${f} flavoring, cut back: ${q(RC[s],'scoop')}`],`brownie ${mk(m)} with ${f}`);};
+const bon=()=>{const s=ri(3),m=ch(.4);return W(s,m,0,[q(['1 1/2','2','3'][s],'pump')+' Hot Fudge',q(['3/4','1','1 1/2'][s],'scoop')+' Black Cherries'],`cherry bon bon ${mk(m)}`);};
+const spl=()=>{const s=ch(.3)?ri(2):2,w=W(2,0,0,["Inside: 1 scoop Strawberry, 1 scoop Pineapple, 1 scoop Peach, 2 spoons Mixed Nuts, filled to the apostrophe in the Whitey's logo",'On top: thinly sliced small banana (or 1/2 a large banana), whipped cream to fill the cup, 1 spoon mixed nuts, a cherry'],'banana split shake');w.d=`${SZ[s]} banana split shake`;if(s<2)w.a.unshift('LARGE ONLY: tell them the Banana Split Shake only comes in large');return w;};
+const fic=()=>{const s=ri(3),f=R(ICF),v=R(['vanilla','chocolate','strawberry']);return W(s,'x',0,[`${RA[s]} cone-size scoops ${f} ice cream (start with this, not MM)`,`${v} flavoring, cut back: ${q(RC[s],'scoop')}`,'Fill with MM (if you need more, add MM, never more flavored ice cream)'],`${f} ice cream shake with ${v} flavoring`);};
+const misc=()=>{const b=R([bc,can,ore,cbar,cd,tur,bro,bon,fic])(),x=R(['the hot fudge','the cake batter','a half banana']);b.d+=`, and add ${x}`;b.a.push(`Add ${x}, then press Misc. Extras and use the $0.40 extra button`);return b;};
+const bos=()=>{const hs=ch(.35),ht=ch(.35),sh=hs?R(['Hot Fudge','Banana','Cake Batter']):R(REG),tp=ht?'Hot Fudge':R(['Chocolate','Butterscotch','Marshmallow',...FRUIT]),m=ch(.3);
+const sl=sh==='Hot Fudge'?['4 pumps Hot Fudge']:sh==='Banana'?['A dash of vanilla','1 medium banana']:sh==='Cake Batter'?['Cake Batter: 1 powder + 2 liquid (scoops)']:[amt('3',sh)+' flavoring'];
+const btn=hs&&ht?'Double Fudge Boston':hs||ht?'Hot Fudge Boston':'Regular Boston';
+return {d:`Boston with ${/^[aeiou]/i.test(sh)?'an':'a'} ${lc(sh)} ${mk(m)} and ${lc(tp)} on the sundae`,a:[...MMl(m),...sl,'Large only: fill to the apostrophe','Top with a 4 oz. dip of Vanilla',ht?'2 pumps Hot Fudge':'1 '+un(tp)+' '+tp,`Register: press ${btn} (${hs?'HF-priced':'regular'} shake + ${ht?'HF':'regular'} sundae)`]};};
+const CN=[['mini dip','2 oz.','Mini Dip cup'],['one dip','4-5 oz.','One Dip cup'],['two dip','8 oz.','Two Dip cup'],['three dip','12 oz.','Two Dip cup']];
+const cone=()=>{const [n,w,c]=R(CN),f=R(ICF),wf=ch(.25)?R(['waffle cone','waffle bowl']):0;return {d:`${n} of ${lc(f)}${wf?' in a '+wf:''}`,a:[`${w} of ${f}`,wf?`Serve in a ${wf}: press the ${wf} button (additional charge)`:`Serve in a ${c}`]};};
+const fl=()=>{const f=[...ICF].sort(()=>Math.random()-.5).slice(0,4);return {d:`flavor flight with ${lc(f[0])}, ${lc(f[1])}, ${lc(f[2])} and ${lc(f[3])}`,a:[`Four 2 oz. dips: ${f.join(', ')}`,'Serve in a Banana Boat']};};
+const pup=()=>({d:'pup cup for my dog',a:['A mini dip (2 oz.) of vanilla','A dog bone on top','Serve in a mini dip cup']});
+const PKG=[['pint','16 oz.',1],['quart','32 oz.',1],['1 1/2 quart','1 1/2 qt.',0],['gallon pail','4 qt. (1 gallon)',0]],OKS={'Black Walnut':['pint'],'French Vanilla':['pint','1 1/2 quart'],'Praline Pecan':['1 1/2 quart','pint']};
+const pk=()=>{const [n,oz,hp]=R(PKG),g=n==='gallon pail',f=ch(.3)?R(Object.keys(OKS)):g&&ch(.8)?'Vanilla':R(ICF),hand=ch(.3);let a;
+if(OKS[f]&&!OKS[f].includes(n))a=[`NO: ${f} doesn't come in a ${n}`,`${f} is prepackaged only, in: ${OKS[f].join(' and ')}`];
+else if(g&&f!=='Vanilla')a=['NO: the 4 qt. (1 gallon) pail only comes in Vanilla (prepackaged only)'];
+else if(hand&&(!hp||OKS[f]))a=['NO handpacking: that one is prepackaged only',`${n} = ${oz}`];
+else a=[`${n} = ${oz} of ${f}`,hand?'Handpacked':hp&&!OKS[f]?'Prepackaged or handpacked, either works':'Prepackaged'];
+return {d:`${n} of ${lc(f)}${hand?', handpacked':''}`,a};};
+const sun=()=>{const d=ri(3),tp=R(['Chocolate','Butterscotch','Marshmallow',...FRUIT,'Hot Fudge']),ic=ch(.3)?R(ICF.filter(x=>x!=='Vanilla')):'Vanilla';
+const t=FRUIT.includes(tp)?`${['1 1/2','2','3'][d]} scoops ${tp} (mostly fruit with juice, plenty of fruit)`:tp==='Hot Fudge'?`${['3','5','7'][d]} pumps Hot Fudge`:`${tp}: UOJ (use own judgment)`;
+return {d:`${['one','two','three'][d]} dip ${lc(tp)} sundae${ic!=='Vanilla'?' with '+lc(ic)+' ice cream':''}`,a:[`${['One 6 oz. dip','Two 4 oz. dips (8 oz. total)','Three 4 oz. dips (12 oz. total)'][d]} of ${ic}`,`Cup: ${['one dip cup','two dip cup','large shake cup or boat'][d]}`,t,'Weigh it (all sundaes must be weighed)',...(ic!=='Vanilla'?['No extra charge for the non-vanilla ice cream']:[])]};};
+const spc=()=>{const t=R(['Turtle','Cherry Bon Bon','Dusty Road',"S'mores",'Brownie Under']),d=ri(2),ic=t==="S'mores"?'Graham Central Station (GCS)':'Vanilla';
+const sp={'Turtle':[q(['3/4','1'][d],'pump')+' Butterscotch',q(['2','3'][d],'pump')+' Hot Fudge',['3','4'][d]+' spoons pecans'],
+'Cherry Bon Bon':[q(['2','3'][d],'pump')+' Hot Fudge',q(['1','1 1/2'][d],'scoop')+' Black Cherry'],
+'Dusty Road':['Chocolate (UOJ)',['1 heaping spoon','1 1/2 heaping spoons'][d]+' Malt Powder'],
+"S'mores":[q(['1','2'][d],'pump')+' Marshmallow',q(['2','3'][d],'pump')+' Hot Fudge',q(['1','2'][d],'scoop')+' chocolate chips'],
+'Brownie Under':['1 brownie',q(['2','3'][d],'pump')+' Hot Fudge','Topping: 2 spoons mixed nuts, whipped cream, 1 spoon mixed nuts, 1 cherry',...(d?['Boat: cut the brownie in half, a scoop of ice cream on each half, then toppings. (Large cup: layer brownie, ice cream, fudge; repeat; then nuts, whip, cherry)']:[])]}[t];
+const cup=t==='Brownie Under'?['2 dip cup or med. cup','boat or large cup'][d]:['8 oz. sundae cup','16 oz. sundae cup'][d];
+return {d:`${['one','two'][d]} dip ${t}`,a:[`${['One 6 oz. dip','Two 4 oz. dips (8 oz. total)'][d]} of ${ic}. Cup: ${cup}`,...sp]};};
+const GR={shakes:[reg,hf,cake,ban,bc,can,ore,cbar,cd,tur,bro,bon,spl,fic,misc],p3:[bos,bos,cone,cone,fl,pup,pk,pk],sun:[sun,sun,spc,spc,spc]};
+const gen=c=>R(GR[c==='all'?R(['shakes','p3','p3','sun','sun']):c])();
+const art=d=>(/^(?!one)[aeiou]/i.test(d)?'an ':'a ')+d;
+function newOrder(){const n=+$('gN').value,c=$('gCat').value,it=[];for(let i=0;i<n;i++)it.push(gen(c));
+return {it,say:it.map((x,i)=>(i?R(['Also','And','Plus'])+' ':R(['Hi! Can I get',"I'll have",'Could I get','Let me get'])+' ')+art(x.d)+'.').join(' ')};}
+const ansHTML=o=>`<div class="count">They said: ${formatFractions(o.say)}</div><div class="gshort">${o.it.map(x=>abbr(x.d)).join(' + ')}</div><div class="count">Shorthand like that is all you need to write. Full build, to check yourself:</div>`+o.it.map((x,i)=>(o.it.length>1?`<b>${i+1}. ${abbr(x.d)}</b>`:'')+'<ul>'+x.a.map(l=>`<li>${formatFractions(l)}</li>`).join('')+'</ul>').join('');
+//UI
+const ABR=[[/ on the sundae/gi,' top'],[/ of /gi,' '],[/ ice cream\b/gi,''],[/ in an? waffle cone/gi,' WC'],[/ in an? waffle bowl/gi,' WB'],[/\bthe\b/gi,''],[/\b(one|two|three|mini) dip\b/gi,(m,a)=>a+'-D'],[/\bsmall\b/gi,'Sm'],[/\bmedium\b/gi,'Med'],[/\blarge\b/gi,'Lg'],[/\bshake\b/gi,'Sh'],[/\bmalt\b/gi,'Mlt'],[/, easy on the flavor|, but go light on the flavoring/gi,', cut'],[/, and make it thin|, nice and thin please/gi,', thin'],[/\bchocolate chip cookie dough\b/gi,'CCCD'],[/\bchocolate\b/gi,'Choc'],[/\bvanilla\b/gi,'Van'],[/\bstrawberry\b/gi,'Straw'],[/\braspberry\b/gi,'Rasp'],[/\bpeanut butter\b/gi,'PB'],[/\bhot fudge\b/gi,'HF'],[/\bbutterscotch\b/gi,'Bsc'],[/\bmarshmallow\b/gi,'Marsh'],[/\bpineapple\b/gi,'Pine'],[/\bblueberry\b/gi,'Blue'],[/\bbanana\b/gi,'Ban'],[/\bcake batter\b/gi,'CB'],[/\bsundae\b/gi,'Sun'],[/\bhandpacked\b/gi,'HP'],[/ on the sundae/gi,' top'],[/ for my dog/gi,''],[/\bwith an?\b/gi,'w/'],[/\bwith\b/gi,'w/'],[/\band\b/gi,'&'],[/\bextra\b/gi,'ex']];
+const abbr=d=>{let s=d;for(const [r,t] of ABR)s=s.replace(r,t);return s.replace(/\s+/g,' ').trim().replace(/(^|\s)(?!w\/)[a-z]/g,c=>c.toUpperCase());};
+let AC=null,T=null,TW=null,left=5,cur=null,st='idle';
+const beep=(f,d,t='square',v=.05,w=0)=>{if(!$('gSnd').checked||!AC)return;try{const o=AC.createOscillator(),g=AC.createGain(),s=AC.currentTime+w;o.type=t;o.frequency.value=f;g.gain.setValueAtTime(v,s);g.gain.exponentialRampToValueAtTime(.0001,s+d);o.connect(g);g.connect(AC.destination);o.start(s);o.stop(s+d+.02);}catch(e){}};
+let S={n:0,ok:0,streak:0,best:0};try{S=Object.assign(S,JSON.parse(localStorage.getItem('whiteys-game-v1')||'{}'));}catch(e){}
+const sv=()=>{try{localStorage.setItem('whiteys-game-v1',JSON.stringify(S));}catch(e){}};
+const sc=()=>{$('gScore').textContent=`Orders ${S.n} · Matched ${S.ok} · Streak ${S.streak} (best ${S.best})`;};
+const setBtns=()=>{$('gReveal').disabled=!(st==='run'||st==='time');$('gStart').disabled=st==='run'||st==='time';$('gGrade').hidden=st!=='rev';};
+const typeIt=(txt,ms)=>{clearTimeout(TW);const el=$('gOrder');el.textContent='';el.classList.add('typing');const d=Math.min(70,ms/txt.length);let i=0;(function step(){if(i>=txt.length){el.classList.remove('typing');el.innerHTML=formatFractions(txt);return;}const c=txt[i++];el.textContent=txt.slice(0,i);TW=setTimeout(step,Math.max(d,1000/22)*(/[.,!]/.test(c)?1.8:1));})();};
+$('gStart').onclick=()=>{try{AC=AC||new(window.AudioContext||window.webkitAudioContext)();AC.resume();}catch(e){}
+clearInterval(T);clearTimeout(TW);cur=newOrder();st='run';left=5;$('gAns').hidden=true;$('gTime').textContent=left;$('gTime').classList.remove('low');
+const b=$('gBar');b.style.transition='none';b.style.width='100%';void b.offsetWidth;b.style.transition='width 5s linear';b.style.width='0%';
+typeIt(cur.say,3600);beep(660,.12,'sine',.08);$('gMsg').textContent='Listen up. It vanishes in 5 seconds. Jot it in shorthand.';setBtns();
+T=setInterval(()=>{left--;$('gTime').textContent=left;if(left<=2)$('gTime').classList.add('low');
+if(left>0)beep(left<=2?1500:900,.05,'square',.05);
+else{clearInterval(T);clearTimeout(TW);st='time';$('gOrder').classList.remove('typing');$('gOrder').textContent='(Gone! Finish writing what you caught.)';beep(880,.3,'triangle',.12);beep(1320,.5,'triangle',.1,.15);$('gMsg').textContent='Time! Reveal when you are ready.';setBtns();}},1000);};
+$('gReveal').onclick=()=>{clearInterval(T);clearTimeout(TW);st='rev';$('gOrder').classList.remove('typing');$('gOrder').textContent='(Order hidden. Answer below.)';$('gAns').innerHTML=ansHTML(cur);$('gAns').hidden=false;beep(784,.15,'sine',.1);beep(1047,.3,'sine',.1,.12);$('gMsg').textContent='Compare with your paper, then grade yourself.';setBtns();};
+const gr=ok=>{S.n++;if(ok){S.ok++;S.streak++;S.best=Math.max(S.best,S.streak);beep(784,.12,'sine',.1);beep(1175,.25,'sine',.1,.1);}else{S.streak=0;beep(180,.3,'sawtooth',.06);}sv();sc();st='idle';setBtns();$('gMsg').textContent='Next customer when you are ready.';};
+$('gOk').onclick=()=>gr(1);$('gNo').onclick=()=>gr(0);
+const tab=g=>{$('cardsView').hidden=g;$('gameView').hidden=!g;$('tabCards').classList.toggle('on',!g);$('tabGame').classList.toggle('on',g);};
+$('tabCards').onclick=()=>tab(0);$('tabGame').onclick=()=>tab(1);sc();setBtns();
+
+</script>
+</body>
+</html>
